@@ -150,7 +150,7 @@ const verificarEmail = (email) => {
     });
   }
 
-  const result = validateEmailFormat(email);
+  const result = await validateEmailFormat(email);
   if(!result) {
     return{
       status: 422,
