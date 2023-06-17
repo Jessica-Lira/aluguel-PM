@@ -139,7 +139,7 @@ const permiteAluguel = async (request, reply) => {
 };
 
 /* ********                EMAIL                   ********    */
-const verificarEmail = (email) => {
+const verificarEmail = async (email) => {
   if (!email) {
     return reply.status(400).send({
       success: false,
@@ -151,6 +151,7 @@ const verificarEmail = (email) => {
   const result = await validateEmailFormat(email);
   if(!result) {
     return{
+      success: false,
       status: 422,
       message: 'Dados inválidos.'
     }
