@@ -87,8 +87,6 @@ const atualizarCiclista = async (request, reply) => {
       return reply.status(404).send('Ciclista não encontrado')
     }
 
-    const ciclistaAtualizado = { ...ciclista, ...dadosAtualizados }
-
     ciclistas[ciclistas.indexOf(ciclista)] = { ...ciclista, ...dadosAtualizados }
 
     return reply.status(200).send('Dados atualizados' + JSON.stringify(ciclista))
