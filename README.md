@@ -47,9 +47,14 @@ A entrega deve ter:
 
 - Testes unitários em abundância (escopo de método), utilizando mocks;
 
-- A ferramenta Sonar configurada (no sonarcloud.io) com: (i) 0 Bug, (ii) 0 Vulnerability, (iii)  0 Code Smells nas severidades blocker, critical e major (minor e info sem restrições), (iv) testes unitários com cobertura de código mínima de 80% e (v) menos de 1% de duplicação de código. 
+- A ferramenta Sonar configurada (no sonarcloud.io) com: 
+- (i) 0 Bug, 
+- (ii) 0 Vulnerability, 
+- (iii)  0 Code Smells nas severidades blocker, critical e major (minor e info sem restrições), 
+- (iv) testes unitários com cobertura de código mínima de 80% e 
+- (v) menos de 1% de duplicação de código. 
 
-Estar disponibilizado no Heroku (ou em outra plataforma escolhida).
+- Disponibilizado no cyclic.
 
 <br>
 <h4> 🔧 Instalação </h4>
@@ -82,7 +87,7 @@ $ npm test
 <h4 align="center">
   Você pode visualizar a aplicação funcionando através do link: <br>
 
-  <a target="_blank">site aqui</a>
+  <a target="_blank">[aluguel](https://sore-jade-clownfish-veil.cyclic.app/)</a>
   
 </h4>
 
