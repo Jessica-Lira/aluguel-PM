@@ -224,6 +224,10 @@ const atualizarCartaoCredito = async (request, reply) => {
   }
 };
 
+function validarEmail(email) {
+
+}
+
 module.exports = {
   getCiclistas,
   criarCiclista,

@@ -128,6 +128,7 @@ let funcionarios = [
   }
 ]
 
+
 module.exports = {
   ciclistas, 
   funcionarios
