@@ -5,7 +5,7 @@ const { funcionarios } = require('../data.js');
 //Não precisa
 const getFuncionarios = async (request, reply) => {
     try {
-      return reply.status(201).send(funcionarios)
+      return reply.status(200).send(funcionarios)
     } catch (error) {
       console.error(error)
       reply.status(500).send('Erro ao obter funcionarios')

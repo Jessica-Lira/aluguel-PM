@@ -72,7 +72,7 @@ let ciclistas = [
 
 let funcionarios = [
   {
-      id: uuidv4(),
+      id: 1,
       matricula: uuidv1(),
       senha: "senhafuncionarioteste1",
       confirmacaoSenha: "senhafuncionario1",
@@ -83,7 +83,7 @@ let funcionarios = [
       cpf: "cpfdofuncionario1"
   },
   {
-      id: uuidv4(),
+      id: 2,
       matricula: uuidv1(),
       senha: "senhafuncionario2",
       confirmacaoSenha: "senhafuncionario2",
@@ -94,7 +94,7 @@ let funcionarios = [
       cpf: "cpfdofuncionario2"
   },
   {
-      id: uuidv4(),
+      id: 3,
       matricula: uuidv1(),
       senha: "senhafuncionario3",
       confirmacaoSenha: "senhafuncionario3",
@@ -105,7 +105,7 @@ let funcionarios = [
       cpf: "cpfdofuncionario3"
   },
   {
-      id: uuidv4(),
+      id: 4,
       matricula: uuidv1(),
       senha: "senhafuncionario4",
       confirmacaoSenha: "senhafuncionario4",
@@ -116,7 +116,7 @@ let funcionarios = [
       cpf: "cpfdofuncionario4"
   },
   {
-      id: uuidv4(),
+      id: 5,
       matricula: uuidv1(),
       senha: "senhafuncionario5",
       confirmacaoSenha: "senhafuncionario5",
