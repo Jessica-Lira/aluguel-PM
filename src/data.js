@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
+const { v1: uuidv1 } = require('uuid');
 
 let ciclistas = [
     {
@@ -72,7 +73,8 @@ let ciclistas = [
 let funcionarios = [
   {
       id: uuidv4(),
-      senha: "senhafuncionario1",
+      matricula: uuidv1(),
+      senha: "senhafuncionarioteste1",
       confirmacaoSenha: "senhafuncionario1",
       email: "funcionario1@example.com",
       nome: "funcionario1",
@@ -82,6 +84,7 @@ let funcionarios = [
   },
   {
       id: uuidv4(),
+      matricula: uuidv1(),
       senha: "senhafuncionario2",
       confirmacaoSenha: "senhafuncionario2",
       email: "funcionario2@example.com",
@@ -92,6 +95,7 @@ let funcionarios = [
   },
   {
       id: uuidv4(),
+      matricula: uuidv1(),
       senha: "senhafuncionario3",
       confirmacaoSenha: "senhafuncionario3",
       email: "funcionario3@example.com",
@@ -102,6 +106,7 @@ let funcionarios = [
   },
   {
       id: uuidv4(),
+      matricula: uuidv1(),
       senha: "senhafuncionario4",
       confirmacaoSenha: "senhafuncionario4",
       email: "funcionario4@example.com",
@@ -112,6 +117,7 @@ let funcionarios = [
   },
   {
       id: uuidv4(),
+      matricula: uuidv1(),
       senha: "senhafuncionario5",
       confirmacaoSenha: "senhafuncionario5",
       email: "funcionario5@example.com",
