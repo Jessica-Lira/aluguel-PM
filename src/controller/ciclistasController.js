@@ -88,12 +88,10 @@ const atualizarCiclista = async(request, reply) => {
       return reply.status(404).send('Ciclista não encontrado');
     }
 
-    if (dadosAtualizados.nacionalidade === 'BR') {
-      if (!dadosAtualizados.cpf || dadosAtualizados.cpf.length !== 11) {
-        return reply.status(422).send('Dados inválidos. O CPF deve ser preenchido corretamente.');
-      } else if (!dadosAtualizados.passaporte || !dadosAtualizados.passaporte.numero || !dadosAtualizados.passaporte.pais) {
-        return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.');
-      }
+if (dadosAtualizados.nacionalidade === 'BR' && (!dadosAtualizados.cpf || dadosAtualizados.cpf.length !== 11) || 
+    (!dadosAtualizados.passaporte?.numero || !dadosAtualizados.passaporte?.pais)) {
+  return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios corretamente.');
+}
 
       if (dadosAtualizados.senha !== dadosAtualizados.confirmarSenha) {
         return reply.status(422).send('Dados inválidos. A senha e a confirmação de senha devem ser iguais.');
