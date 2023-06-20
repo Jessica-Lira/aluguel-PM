@@ -275,21 +275,21 @@ const getDadosCiclista = (ciclista) => {
 const verificarNacionalidade = async (novoCiclista) => {
   const { nacionalidade } = novoCiclista;
 
-  if (nacionalidade.toUpperCase() === 'BR') {
-    if (!novoCiclista.cpf || novoCiclista.cpf.length !== 11) {
-      return {
-        success: false,
-        status: 422,
-        message: 'Dados inválidos. O CPF deve ser preenchido corretamente.',
-      };
-    }
-  } else if (!novoCiclista.passaporte || !novoCiclista.passaporte.numero || !novoCiclista.passaporte.pais) {
+if (nacionalidade?.toUpperCase() === 'BR') {
+  if (!novoCiclista.cpf || novoCiclista.cpf.length !== 11) {
+    return {
+      success: false,
+      status: 422,
+      message: 'Dados inválidos. O CPF deve ser preenchido corretamente.',
+    };
+  }
+} else if (!novoCiclista.passaporte?.numero || !novoCiclista.passaporte?.pais) {
     return {
       success: false,
       status: 422,
       message: 'Dados inválidos. O passaporte deve ser preenchido corretamente.',
     };
-  }
+}
 
   return { success: true };
 };
