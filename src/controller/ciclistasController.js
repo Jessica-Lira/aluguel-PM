@@ -242,7 +242,10 @@ const atualizarCartaoCredito = async (request, reply) => {
       return reply.status(422).send('Dados inválidos. Forneça um cartão válido.');
     }
 
-    //enviar email
+    const resultadoEnvioEmail = await enviarEmail(novoCiclista.email, 'Email enviado!');
+    if (!resultadoEnvioEmail.success) {
+      return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.message);
+    }
 
     ciclista.meioDePagamento = { ...ciclista.meioDePagamento, ...dadosAtualizados };
 
@@ -310,9 +313,6 @@ const verificarConfirmacaoSenha = (novoCiclista) => {
 const verificarCartaoCredito = (cartao) => {
   const { nomeTitular, numero, validade, cvv } = cartao;
 
-const verificarCartaoCredito = (cartao) => {
-  const { nomeTitular, numero, validade, cvv } = cartao;
-
   return (
     (!nomeTitular || typeof nomeTitular !== 'string') ||
     (!numero || typeof numero !== 'string' || numero.length !== 16) ||
@@ -359,5 +359,5 @@ module.exports = {
   ativarCadastroCiclista,
   permiteAluguel,
   getCartaoCredito,
-  atualizarCartaoCredito
+  atualizarCartaoCredito,
 }

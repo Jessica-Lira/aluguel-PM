@@ -14,6 +14,16 @@ describe('getCiclistas route test', () => {
     expect(response.statusCode).toBe(200);
   });
   //caso negativo
+  test('Should return error when wrong url called', async () => {
+    const app = build();
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/ciclista'
+    });
+
+    expect(response.statusCode).toBe(404);
+  });
 });
 
 describe('criarCiclista route test', () => {
