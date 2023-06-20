@@ -20,6 +20,7 @@ const criarCiclista = async (request, reply) => {
 
     novoCiclista.id = uuidv4();
     novoCiclista.ativo = false;
+    novoCiclista.statusAluguel = false;
 
     const resultadoVerificacaoEmail = await verificarEmail(novoCiclista.email);
     if (!resultadoVerificacaoEmail.success) {
@@ -41,9 +42,15 @@ const criarCiclista = async (request, reply) => {
       return reply.status(resultadoVerificacaoNacionalidade.status).send(resultadoVerificacaoNacionalidade.message);
     }
   
-      //valida cartao de credito - cartao reprovado: O sistema informa que o cartão foi recusado.
+    const resultadoValidacaoCartao = await validarCartaoCredito(novoCiclista.meioDePagamento);
+    if (!resultadoValidacaoCartao.success) {
+      return reply.status(resultadoValidacaoCartao.status).send(resultadoValidacaoCartao.message);
+    }
 
-      //envia msg pro email - erro ao enviar email: O sistema informa que não foi possível enviar o email.
+      const resultadoEnvioEmail = await enviarEmail(novoCiclista.email, 'Email enviado!');
+      if (!resultadoEnvioEmail.success) {
+        return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.message);
+      }
 
       ciclistas.push(novoCiclista);
       return reply.status(201).send(novoCiclista);
@@ -97,13 +104,16 @@ if (dadosAtualizados.nacionalidade === 'BR' && (!dadosAtualizados.cpf || dadosAt
         return reply.status(422).send('Dados inválidos. A senha e a confirmação de senha devem ser iguais.');
       }
 
-      //envia msg pro email - erro ao enviar email: O sistema informa que não foi possível enviar o email.
+      const resultadoEnvioEmail = await enviarEmail(novoCiclista.email, 'Email enviado!');
+      if (!resultadoEnvioEmail.success) {
+        return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.message);
+      }
 
       ciclistas[ciclistas.indexOf(ciclista)] = { ...ciclista, ...dadosAtualizados };
 
       return reply.status(200).send('Dados atualizados' + JSON.stringify(ciclista));
     } 
-  } catch (error) {
+   catch (error) {
       console.error(error);
       reply.status(422).send('Dados inválidos');
     }
@@ -137,6 +147,14 @@ const permiteAluguel = async (request, reply) => {
       return reply.status(404).send({
         codigo: '404',
         mensagem: 'Ciclista não encontrado'
+      });
+    }
+    
+    const opcaoAluguel = ciclista.statusAluguel;
+    if (opcaoAluguel === true) {
+      return reply.status(422).send({
+        codigo: '422',
+        mensagem: 'Ciclista já possui um aluguel em andamento'
       });
     }
 
@@ -253,10 +271,11 @@ const getDadosCiclista = (ciclista) => {
     urlFotoDocumento: ciclista.urlFotoDocumento
   };
 };
+
 const verificarNacionalidade = async (novoCiclista) => {
   const { nacionalidade } = novoCiclista;
 
-  if (nacionalidade === 'BR') {
+  if (nacionalidade.toUpperCase() === 'BR') {
     if (!novoCiclista.cpf || novoCiclista.cpf.length !== 11) {
       return {
         success: false,
@@ -299,6 +318,18 @@ const verificarCartaoCredito = (cartao) => {
   return true;
 };
 
+const validarCartaoCredito = async (cartao) => {
+  // Lógica de validação do cartão de crédito real por API 
+
+  const cartaoAprovado = true; 
+
+  if (cartaoAprovado) {
+    return { success: true, status: 200, message: '' };
+  } else {
+    return { success: false, status: 422, message: 'O cartão foi recusado. Entre com um cartão valido.' };
+  }
+};
+
 const verificarCamposObrigatorios = (objeto, campos) => {
   for (const campo of campos) {
     if (!objeto[campo]) {
@@ -306,6 +337,15 @@ const verificarCamposObrigatorios = (objeto, campos) => {
     }
   }
   return true;
+};
+
+const enviarEmail = async (email, mensagem) => {
+  try {
+    // Envio de e-mail vi API
+    return { success: true, status: 200, message: 'E-mail enviado com sucesso.' };
+  } catch (error) {
+    return { success: false, status: 500, message: 'Não foi possível enviar o e-mail.'};
+  }
 };
 
 module.exports = {
