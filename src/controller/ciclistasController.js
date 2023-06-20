@@ -1,104 +1,127 @@
 const { v4: uuidv4 } = require('uuid');
 const { ciclistas } = require('../data.js');
 
-// Acho que esse metodo nao existe <<<<<<< DELETAR
-async function getCiclistas(request, reply) {
+const getCiclistas = async (request, reply) => { //metodo aux , nao tem cdu
   try {
     return reply.status(200).send(ciclistas);
   } catch (error) {
     console.error(error);
-    reply.status(500).send('Erro ao obter ciclistas');
+    reply.status(404).send('Erro ao obter ciclistas');
   }
-}
+};
 
 const criarCiclista = async (request, reply) => {
   try {
-    const novoCiclista = request.body
+    const { body: novoCiclista } = request;
 
-    const id = uuidv4();
-    novoCiclista.id = id;
+    if (!novoCiclista) {
+      return reply.status(404).send('Requisição mal formada. Dados não fornecidos.');
+    }
 
+    novoCiclista.id = uuidv4();
     novoCiclista.ativo = false;
+    novoCiclista.statusAluguel = false;
 
-    // Chama metodo de verificacao de email
-    const resultadoVerificacaoEmail = verificarEmail(novoCiclista.email);
+    const resultadoVerificacaoEmail = await verificarEmail(novoCiclista.email);
     if (!resultadoVerificacaoEmail.success) {
       return reply.status(resultadoVerificacaoEmail.status).send(resultadoVerificacaoEmail.message);
     }
 
-    if (!novoCiclista.email || !novoCiclista.nacionalidade || !novoCiclista.nome || !novoCiclista.senha) {
-      return reply.status(404).send('Requisição mal formada. Preencha todos os campos obrigatórios e tente novamente.');
+    const camposObrigatorios = ['email', 'nacionalidade', 'nascimento', 'nome', 'senha', 'confirmarSenha', 'meioDePagamento'];
+    if (!verificarCamposObrigatorios(novoCiclista, camposObrigatorios)) {
+      return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.');
+    }
+  
+    const resultadoVerificacaoSenha = await verificarConfirmacaoSenha(novoCiclista);
+    if (!resultadoVerificacaoSenha.success) {
+      return reply.status(resultadoVerificacaoSenha.status).send(resultadoVerificacaoSenha.message);
     }
 
-    ciclistas.push(novoCiclista);
-    return reply.status(201).send(novoCiclista);
-  } catch (error) {
-    console.error(error)
-    reply.status(422).send('Dados inválidos')
-  }
-}
+    const resultadoVerificacaoNacionalidade = await verificarNacionalidade(novoCiclista);
+    if (!resultadoVerificacaoNacionalidade.success) {
+      return reply.status(resultadoVerificacaoNacionalidade.status).send(resultadoVerificacaoNacionalidade.message);
+    }
+  
+    const resultadoValidacaoCartao = await validarCartaoCredito(novoCiclista.meioDePagamento);
+    if (!resultadoValidacaoCartao.success) {
+      return reply.status(resultadoValidacaoCartao.status).send(resultadoValidacaoCartao.message);
+    }
 
-const getCiclistaById = async (request, reply) => {
+      const resultadoEnvioEmail = await enviarEmail(novoCiclista.email, 'Email enviado!');
+      if (!resultadoEnvioEmail.success) {
+        return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.message);
+      }
+
+      ciclistas.push(novoCiclista);
+      return reply.status(201).send(novoCiclista);
+    }
+  catch (error) {
+    console.error(error);
+    reply.status(404).send('Requisição mal formada');
+  }
+};
+
+const getCiclistaById = async(request, reply) => {
   try {
-    const id = request.params.id
-    const ciclista = ciclistas.find(c => c.id === id)
+    const { id } = request.params;
+    const ciclista = ciclistas.find(c => c.id === id);
 
     if (!ciclista) {
-      return reply.status(404).send({
-        codigo: "404",
-        mensagem: "Requisição não encontrada"
+      return reply.status(422).send({
+        codigo: "422",
+        mensagem: "Dados inválidos. Por favor entre com um ciclista valido."
       });
     }
 
-    //retornar apenas os dados que desejamos <<< TEM METODO MELHOR DE FAZER ISSO?
-    const dadosCiclista = {
-      id: ciclista.id,
-      status: ciclista.ativo ? 'Ativo' : 'Inativo',
-      nome: ciclista.nome,
-      nascimento: ciclista.nascimento,
-      cpf: ciclista.cpf,
-      passaporte: {
-        numero: ciclista.passaporte.numero,
-        validade: ciclista.passaporte.validade,
-        pais: ciclista.passaporte.pais
-      },
-      nacionalidade: ciclista.nacionalidade,
-      email: ciclista.email,
-      urlFotoDocumento: ciclista.urlFotoDocumento
-    };
+    const dadosCiclista = getDadosCiclista(ciclista);
 
-    return reply.send(dadosCiclista)
+    return reply.send(dadosCiclista);
   } catch (error) {
-    console.error(error)
-    reply.status(422).send({
-      codigo: "422",
-      mensagem: "Dados inválidos"
-    })
+    console.error(error);
+    reply.status(404).send({
+      codigo: "404",
+      mensagem: "Requisição não encontrada."
+    });
   }
-}
+};
 
-const atualizarCiclista = async (request, reply) => {
+const atualizarCiclista = async(request, reply) => {
   try {
-    const id = request.params.id
-    const dadosAtualizados = request.body
-    const ciclista = ciclistas.find(c => c.id === id)
+    const { id } = request.params;
+    const dadosAtualizados = request.body;
+    const ciclista = ciclistas.find(c => c.id === id);
 
     if (!ciclista) {
-      return reply.status(404).send('Ciclista não encontrado')
+      return reply.status(404).send('Ciclista não encontrado');
     }
 
-    ciclistas[ciclistas.indexOf(ciclista)] = { ...ciclista, ...dadosAtualizados }
-
-    return reply.status(200).send('Dados atualizados' + JSON.stringify(ciclista))
-  } catch (error) {
-    console.error(error)
-    reply.status(422).send('Dados inválidos');
-  }
+if (dadosAtualizados.nacionalidade === 'BR' && (!dadosAtualizados.cpf || dadosAtualizados.cpf.length !== 11) || 
+    (!dadosAtualizados.passaporte?.numero || !dadosAtualizados.passaporte?.pais)) {
+  return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios corretamente.');
 }
+
+      if (dadosAtualizados.senha !== dadosAtualizados.confirmarSenha) {
+        return reply.status(422).send('Dados inválidos. A senha e a confirmação de senha devem ser iguais.');
+      }
+
+      const resultadoEnvioEmail = await enviarEmail(novoCiclista.email, 'Email enviado!');
+      if (!resultadoEnvioEmail.success) {
+        return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.message);
+      }
+
+      ciclistas[ciclistas.indexOf(ciclista)] = { ...ciclista, ...dadosAtualizados };
+
+      return reply.status(200).send('Dados atualizados' + JSON.stringify(ciclista));
+    } 
+   catch (error) {
+      console.error(error);
+      reply.status(422).send('Dados inválidos');
+    }
+};
 
 const ativarCadastroCiclista = async (request, reply) => {
   try {
-    const id = request.params.id;
+    const { id } = request.params;
     const ciclista = ciclistas.find(c => c.id === id);
 
     if (!ciclista) {
@@ -106,6 +129,7 @@ const ativarCadastroCiclista = async (request, reply) => {
     }
 
     ciclista.ativo = true;
+    ciclista.dataConfirmacaoAtivacao = new Date(); // Registrar a data/hora da confirmação
 
     return reply.status(200).send('Ciclista ativado' + JSON.stringify(ciclista))
   } catch (error) {
@@ -114,17 +138,23 @@ const ativarCadastroCiclista = async (request, reply) => {
   }
 };
 
-//REVER
 const permiteAluguel = async (request, reply) => {
   try {
-
-    const id = request.params.id
+    const { id } = request.params;
     const ciclista = ciclistas.find(c => c.id === id && c.ativo);
 
     if (!ciclista) {
       return reply.status(404).send({
         codigo: '404',
         mensagem: 'Ciclista não encontrado'
+      });
+    }
+    
+    const opcaoAluguel = ciclista.statusAluguel;
+    if (opcaoAluguel === true) {
+      return reply.status(422).send({
+        codigo: '422',
+        mensagem: 'Ciclista já possui um aluguel em andamento'
       });
     }
 
@@ -141,55 +171,46 @@ const permiteAluguel = async (request, reply) => {
 /* ********                EMAIL                   ********    */
 const verificarEmail = async (email) => {
   if (!email) {
-    return reply.status(400).send({
+    return ({
       success: false,
       status: 400,
       message: 'E-mail não fornecido',
     });
   }
 
-  const result = await validateEmailFormat(email);
-  if(!result) {
-    return{
+  const isEmailValid = validateEmailFormat(email);
+  if (!isEmailValid) {
+    return {
       success: false,
       status: 422,
-      message: 'Dados inválidos.'
-    }
-  };
+      message: 'Formato de e-mail inválido',
+    };
+  }
 
   const emailEmUso = ciclistas.find((c) => c.email === email);
   if (emailEmUso) {
     return {
-      success: true,
+      success: false,
       status: 200,
       message: 'E-mail já está em uso por outro ciclista. Escolha um e-mail diferente.'
     };
   } else {
       return {
-        success: false,
+        success: true,
         status: 200
       };
   }
 };
 
-const validateEmailFormat = async (email) => {
-  return new Promise((resolve, reject) => {
-      const emailRegex = new RegExp(/^[a-zA-Z0-9_%+-]+@[a-zA-Z0-9.-]+[a-zA-Z0-9-]+(.[a-zA-Z]{2,})$/, "gm");
-
-      const timer = setTimeout(() => {
-          resolve(false); // Timeout reached, return false indicating invalid format
-      }, REGEX_TIMEOUT);
-
-      const result = emailRegex.test(email);
-
-      clearTimeout(timer);
-      resolve(result); // Resolve with the result of the regex evaluation
-  });
+const validateEmailFormat = (email) => {
+  const emailRegex = /^\S+@\S+\.\S+$/;
+  return emailRegex.test(email);
 };
 
+/* ********                CARTAO                   ********    */
 const getCartaoCredito = async (request, reply) => {
   try {
-    const id = request.params.id;
+    const { id } = request.params;
     const ciclista = ciclistas.find(c => c.id === id);
 
     if (!ciclista) {
@@ -207,7 +228,7 @@ const getCartaoCredito = async (request, reply) => {
 
 const atualizarCartaoCredito = async (request, reply) => {
   try {
-    const id = request.params.id;
+    const { id } = request.params;
     const dadosAtualizados = request.body;
     const ciclista = ciclistas.find(c => c.id === id);
 
@@ -215,18 +236,23 @@ const atualizarCartaoCredito = async (request, reply) => {
       return reply.status(404).send('Ciclista não encontrado');
     }
 
+    //validar cartao
+    const isValid = verificarCartaoCredito(dadosAtualizados);
+    if (!isValid) {
+      return reply.status(422).send('Dados inválidos. Forneça um cartão válido.');
+    }
+
+    //enviar email
+
     ciclista.meioDePagamento = { ...ciclista.meioDePagamento, ...dadosAtualizados };
 
-    return reply.status(200).send('Dados do cartão de crédito atualizados');
+    return reply.status(200).send('Dados do cartão de crédito atualizados' + JSON.stringify(ciclista.meioDePagamento));
   } catch (error) {
     console.error(error);
     reply.status(422).send('Dados inválidos');
   }
 };
 
-function validarEmail(email) {
-
-}
 
 module.exports = {
   getCiclistas,

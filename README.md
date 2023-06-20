@@ -12,7 +12,8 @@ Microsserviço:
 
 <br>
 Modelo:<br>
-<a target="_blank">https://app.swaggerhub.com/apis/pasemes/sistema-de_controle_de_bicicletario2/1</a>
+
+<a target="_blank">https://app.swaggerhub.com/apis/pasemes/sistema-de_controle_de_bicicletario2/1#/</a>
 
 <br>
 Casos de Uso:
@@ -87,7 +88,7 @@ $ npm test
 <h4 align="center">
   Você pode visualizar a aplicação funcionando através do link: <br>
 
-  <a target="_blank">[aluguel](https://sore-jade-clownfish-veil.cyclic.app/)</a>
+  <a target="_blank">[Microsserviço ALUGUEL](https://sore-jade-clownfish-veil.cyclic.app/helloWorld)</a>
   
 </h4>
 
