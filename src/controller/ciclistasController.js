@@ -310,14 +310,15 @@ const verificarConfirmacaoSenha = (novoCiclista) => {
 const verificarCartaoCredito = (cartao) => {
   const { nomeTitular, numero, validade, cvv } = cartao;
 
-if ( (!nomeTitular || typeof nomeTitular !== 'string') ||
-  (!numero || typeof numero !== 'string' || numero.length !== 16) ||
-  (!validade || typeof validade !== 'string') ||
-  (!cvv || typeof cvv !== 'string' || cvv.length !== 3) ) { 
-  return false; 
-}
-  
-  return true;
+const verificarCartaoCredito = (cartao) => {
+  const { nomeTitular, numero, validade, cvv } = cartao;
+
+  return (
+    (!nomeTitular || typeof nomeTitular !== 'string') ||
+    (!numero || typeof numero !== 'string' || numero.length !== 16) ||
+    (!validade || typeof validade !== 'string') ||
+    (!cvv || typeof cvv !== 'string' || cvv.length !== 3)
+  );
 };
 
 const validarCartaoCredito = async (cartao) => {
