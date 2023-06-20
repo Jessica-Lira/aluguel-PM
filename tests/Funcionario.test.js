@@ -99,7 +99,7 @@ describe('POST de Funcionario na rota /funcionarios com email repetido', () => {
 
     expect(response.statusCode).toBe(422);
   });
-}); 
+});  
 
 /************* TESTES DE CAMPOS OBRIGATÓRIOS *************/
 
@@ -121,7 +121,7 @@ describe('POST de Funcionario na rota /funcionarios sem campo obrigatório SENHA
 
     expect(response.statusCode).toBe(422);
   });
-}); 
+});  
 
 describe('POST de Funcionario na rota /funcionarios sem campo CONFIRMAÇÃO SENHA', () => {
   test('Deve dar erro de post de um funcionario', async () => {
@@ -141,7 +141,7 @@ describe('POST de Funcionario na rota /funcionarios sem campo CONFIRMAÇÃO SENH
 
     expect(response.statusCode).toBe(422);
   });
-}); 
+});  
 
 describe('POST de Funcionario na rota /funcionarios sem campo NOME', () => {
   test('Deve dar erro de post de um funcionario', async () => {
@@ -181,7 +181,7 @@ describe('POST de Funcionario na rota /funcionarios sem campo EMAIL', () => {
 
     expect(response.statusCode).toBe(422);
   });
-}); 
+});  
 
 /************* TESTES DE CAMPOS DE SENHA *************/
 
@@ -204,37 +204,102 @@ describe('POST de Funcionario na rota /funcionarios com senhas diferentes', () =
 
     expect(response.statusCode).toBe(422);
   });
-}); 
+});  
 
-/************* TESTES DE BUSCA DE FUNCIONARIOS *************/
+/************* TESTES DE BUSCA DE FUNCIONARIOS POR ID *************/
 
 describe('GET de Funcionario na rota /funcionarios/:id com id valido', () => {
-  test('Deve dar erro de post de um funcionario', async () => {
+  test('Deve dar sucesso no GET de um funcionario', async () => {
     const app = build();
 
     const response = await app.inject({
       method: 'GET',
-      url: '/funcionarios/:id',
-      payload: { 
-        id: 1
-    }});
+      url: '/funcionarios/1'
+    });
 
+    expect(response.statusCode).toBe(200);
+  });
+});  
+
+describe('GET de Funcionario na rota /funcionarios/:id com id invalido', () => {
+  test('Deve dar falha no GET de um funcionario', async () => {
+    const app = build();
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/funcionarios/10'
+    });
+
+    expect(response.statusCode).toBe(422);
+  });
+}); 
+
+/************* TESTES DE ATUALIZAÇÃO DE FUNCIONARIOS POR ID *************/
+
+describe('PUT de Funcionario na rota /funcionarios/:id com id valido', () => {
+  test('Deve dar sucesso no put de um funcionario', async () => {
+    const app = build();
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: '/funcionarios/1',
+      payload: { 
+        senha: "senhafuncionario1",
+        confirmacaoSenha: "senhafuncionario1",
+        email: "funcionarioteste1@example.com",
+        nome: "funcionarioteste1",
+        idade: 0,
+        funcao: "funcionario",
+        cpf: "cpfdofuncionario1"
+    }});
+    //console.log(response.body)
+    expect(response.statusCode).toBe(200);
+  });
+});  
+
+describe('PUT de Funcionario na rota /funcionarios/:id com id invalido', () => {
+  test('Deve dar falha no put de um funcionario', async () => {
+    const app = build();
+
+    const response = await app.inject({
+      method: 'PUT',
+      url: '/funcionarios/10',
+      payload: { 
+        senha: "senhafuncionario1",
+        confirmacaoSenha: "senhafuncionario1",
+        email: "funcionarioteste1@example.com",
+        nome: "funcionarioteste1",
+        idade: 0,
+        funcao: "funcionario",
+        cpf: "cpfdofuncionario1"
+    }});
+    //console.log(response.body)
+    expect(response.statusCode).toBe(404);
+  });
+});  
+
+/************* TESTES DE REMOÇÃO DE FUNCIONARIOS POR ID *************/
+
+describe('DELETE de Funcionario na rota /funcionarios/:id com id valido', () => {
+  test('Deve dar sucesso no DELETE de um funcionario', async () => {
+    const app = build();
+
+    const response = await app.inject({
+      method: 'DELETE',
+      url: '/funcionarios/1'
+    });
     expect(response.statusCode).toBe(200);
   });
 }); 
 
-describe('GET de Funcionario na rota /funcionarios/:id com id invalido', () => {
-  test('Deve dar erro de post de um funcionario', async () => {
+describe('DELETE de Funcionario na rota /funcionarios/:id com id invalido', () => {
+  test('Deve dar falha no DELETE de um funcionario', async () => {
     const app = build();
 
     const response = await app.inject({
-      method: 'GET',
-      url: '/funcionarios/:id',
-      payload: { 
-        id: 10
-    }});
-
-    expect(response.statusCode).toBe(500);
+      method: 'DELETE',
+      url: '/funcionarios/10'
+    });
+    expect(response.statusCode).toBe(404);
   });
 }); 
-

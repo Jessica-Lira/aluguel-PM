@@ -40,12 +40,11 @@ const criarFuncionario = async (request, reply) => {
       }
 
       funcionarios.push(novoFuncionario)
-      console.log("Funcionario cadastrado com sucesso")
       reply.status(200).send('Dados Cadastrados')
   
       return reply.send(novoFuncionario)
     } catch (error) {
-      console.error(error)
+      //console.error(error)
       reply.status(500).send('Erro ao criar funcionario')
     }
   }
@@ -66,21 +65,21 @@ const getFuncionarioById = async (request, reply) => {
           cpf: funcionario.cpf
         }
 
-        if (!funcionario) {
+        if (!funcionario){
         return reply.status(404).send('Funcionario não encontrado')
         }
 
-        return reply.send(dadosFuncionario)
+        return reply.status(200).send(dadosFuncionario)
+
     } catch (error) {
-        console.error(error)
-        reply.status(500).send('Erro ao obter funcionario')
+        //console.error(error)
+        reply.status(422).send('Erro ao obter funcionario')
     }
 }
 
 const atualizarFuncionario = async (request, reply) => {
     try {
       const id = request.params.id
-      //console.log("ID: "+id)
       const dadosAtualizados = request.body
       const funcionario = funcionarios.find(c => c.id === id)
   
@@ -103,10 +102,11 @@ const atualizarFuncionario = async (request, reply) => {
       const funcionarioAtualizado = { ...funcionario, ...dadosAtualizados }
       funcionarios[funcionarios.indexOf(funcionario)] = { ...funcionario, ...dadosAtualizados }
   
-      //return reply.send(funcionarioAtualizado)
+      return reply.send(funcionarioAtualizado)
       return reply.status(200).send("Dados Atualizados")
+
     } catch (error) {
-      console.error(error)
+      //console.error(error)
       reply.status(500).send('Erro ao obter funcionario')
     }
   }
@@ -114,9 +114,8 @@ const atualizarFuncionario = async (request, reply) => {
 const removerFuncionario = async(request, reply) => {
     try{
     const id = request.params.id
-    console.log("ID a ser removido: "+id)
+    //console.log("ID a ser removido: "+id)
     const funcionario = funcionarios.find(c => c.id === id)
-    console.log("Funcionario a ser removido: "+funcionario)
 
     if (!funcionario) {
     return reply.status(404).send('Funcionario não encontrado')
@@ -128,7 +127,7 @@ const removerFuncionario = async(request, reply) => {
     return reply.status(200).send("Funcionario removido")
     
     } catch (error) {
-        console.error(error)
+        //console.error(error)
         reply.status(500).send('Erro ao obter funcionario')
   }
 }
