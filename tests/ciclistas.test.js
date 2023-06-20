@@ -13,7 +13,7 @@ describe('getCiclistas route test', () => {
 
     expect(response.statusCode).toBe(200);
   });
-  //caso negativo
+
   test('Should return error when wrong url called', async () => {
     const app = build();
 
@@ -60,32 +60,76 @@ describe('criarCiclista route test', () => {
 
   expect(response.statusCode).toBe(201);
   });
-  /*
-  test('Should return 404 when request body is not provided', async () => {
-    const app = build();
 
-    const response = await app.inject({
-      method: 'POST',
-      url: '/ciclistas',
-    });
-
-    expect(response.statusCode).toBe(404);
-  });
-
-  test('Should return 422 when required fields are missing', async () => {
+  test('Should return 400 when without EMAIL', async () => {
     const app = build();
 
     const response = await app.inject({
       method: 'POST',
       url: '/ciclistas',
       payload: {
-        nome: 'Paulo',
-        email: 'paulo@example.com',
-      }
+        id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
+        nome: "Ciclista B",
+        nascimento: "2023-06-11",
+        cpf: "87942565301", 
+        passaporte: {
+          numero: "string",
+          validade: "2023-06-11",
+          pais: "TX"
+        },
+        nacionalidade: "string",
+        email: "",
+        urlFotoDocumento: "string",
+        senha: "string",
+        meioDePagamento: {
+          nomeTitular: "ciclista B",
+          numero: "984602367621417541873846007875805616119812247741040998629140438970271355",
+          validade: "2023-06-11",
+          cvv: "455"
+        },
+        ativo: false,
+        }
+    });
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  test('Should return 422 when wrong format EMAIL', async () => {
+    const app = build();
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/ciclistas',
+      payload: {
+        id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
+        nome: "Ciclista C",
+        nascimento: "2023-06-11",
+        cpf: "87942565301", 
+        passaporte: {
+          numero: "string",
+          validade: "2023-06-11",
+          pais: "TX"
+        },
+        nacionalidade: "string",
+        email: "ciclistac.com",
+        urlFotoDocumento: "string",
+        senha: "string",
+        meioDePagamento: {
+          nomeTitular: "ciclista C",
+          numero: "984602367621417541873846007875805616119812247741040998629140438970271356",
+          validade: "2023-06-11",
+          cvv: "455"
+        },
+        ativo: false,
+        }
     });
 
     expect(response.statusCode).toBe(422);
   });
+
+  /*
+
+      //'nacionalidade', 'nascimento', 'nome', 'senha', 'confirmarSenha', 'meioDePagamento'
 
   //teste se o email ta em uso por outro ciclista
   //teste se envia email
