@@ -104,7 +104,7 @@ if (dadosAtualizados.nacionalidade === 'BR' && (!dadosAtualizados.cpf || dadosAt
         return reply.status(422).send('Dados inválidos. A senha e a confirmação de senha devem ser iguais.');
       }
 
-      const resultadoEnvioEmail = await enviarEmail(novoCiclista.email, 'Email enviado!');
+      const resultadoEnvioEmail = await enviarEmail(ciclista.email, 'Email enviado!');
       if (!resultadoEnvioEmail.success) {
         return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.message);
       }
@@ -236,13 +236,12 @@ const atualizarCartaoCredito = async (request, reply) => {
       return reply.status(404).send('Ciclista não encontrado');
     }
 
-    //validar cartao
     const isValid = verificarCartaoCredito(dadosAtualizados);
     if (!isValid) {
       return reply.status(422).send('Dados inválidos. Forneça um cartão válido.');
     }
 
-    const resultadoEnvioEmail = await enviarEmail(ciclista.email, 'Email enviado!');
+    const resultadoEnvioEmail = await enviarEmail(ciclista, 'Email enviado!');
     if (!resultadoEnvioEmail.success) {
       return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.message);
     }
@@ -314,10 +313,10 @@ const verificarCartaoCredito = (cartao) => {
   const { nomeTitular, numero, validade, cvv } = cartao;
 
   return (
-    (!nomeTitular || typeof nomeTitular !== 'string') ||
-    (!numero || typeof numero !== 'string' || numero.length !== 16) ||
-    (!validade || typeof validade !== 'string') ||
-    (!cvv || typeof cvv !== 'string' || cvv.length !== 3)
+    (!nomeTitular || typeof nomeTitular === 'string') ||
+    (!numero || numero.length === 16) ||
+    (!validade || typeof validade === 'string') ||
+    (!cvv || cvv.length === 3)
   );
 };
 

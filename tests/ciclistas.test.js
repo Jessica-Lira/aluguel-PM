@@ -765,6 +765,7 @@ describe('getCartaoCredito route test', () => {
 });
 
 describe('atualizarCartaoCredito route test', () => {
+
   test('Should update the credit card information of a cyclist', async () => {
     const app = build();
     
@@ -789,6 +790,7 @@ describe('atualizarCartaoCredito route test', () => {
       method: 'PUT',
       url: '/ciclistas/atualizar-cartao/34',
       payload: {
+        nomeTitular: 'Novo nome',
         numero: '987654321',
         validade: '2024-12-31',
         cvv: '456',
@@ -797,22 +799,21 @@ describe('atualizarCartaoCredito route test', () => {
 
     expect(response.statusCode).toBe(404);
   });
-/*
+
   test('Should return 422 if credit card data is invalid', async () => {
     const app = build();
-
     const response = await app.inject({
       method: 'PUT',
       url: '/ciclistas/atualizar-cartao/1',
       payload: {
-        numero: '987654321',
+        nomeTitular: '',
+        numero: '9876',
         validade: '2020-01-01',
-        cvv: '4',
+        cvv: '',
       },
     });
-
     expect(response.statusCode).toBe(422);
   });
-  */
+  
 });
 
