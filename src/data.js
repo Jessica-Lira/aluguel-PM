@@ -22,6 +22,7 @@ let ciclistas = [
         cvv: "4857"
       },
       ativo: false,
+      statusAluguel: false
     },
     {
       id: "2",
@@ -44,6 +45,7 @@ let ciclistas = [
         cvv: "4857"
       },
       ativo: false,
+      statusAluguel: true
     },
     {
       id: "3",
@@ -65,7 +67,8 @@ let ciclistas = [
         validade: "2023-06-11",
         cvv: "4857"
       },
-      ativo: true
+      ativo: true,
+      statusAluguel: false
     },
     {
       id: "4",
@@ -87,7 +90,8 @@ let ciclistas = [
         validade: "2023-06-11",
         cvv: "444"
       },
-      ativo: true
+      ativo: true,
+      statusAluguel: false
     },
 ];
 

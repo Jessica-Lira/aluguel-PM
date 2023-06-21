@@ -242,7 +242,7 @@ const atualizarCartaoCredito = async (request, reply) => {
       return reply.status(422).send('Dados inválidos. Forneça um cartão válido.');
     }
 
-    const resultadoEnvioEmail = await enviarEmail(novoCiclista.email, 'Email enviado!');
+    const resultadoEnvioEmail = await enviarEmail(ciclista.email, 'Email enviado!');
     if (!resultadoEnvioEmail.success) {
       return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.message);
     }
