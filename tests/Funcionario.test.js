@@ -214,7 +214,7 @@ describe('GET de Funcionario na rota /funcionarios/:id com id valido', () => {
 
     const response = await app.inject({
       method: 'GET',
-      url: '/funcionarios/1'
+      url: '/funcionarios/b57a9ded-dd1e-44ba-8c10-d231efb70ad1'
     });
 
     expect(response.statusCode).toBe(200);
@@ -242,7 +242,7 @@ describe('PUT de Funcionario na rota /funcionarios/:id com id valido', () => {
 
     const response = await app.inject({
       method: 'PUT',
-      url: '/funcionarios/1',
+      url: '/funcionarios/b57a9ded-dd1e-44ba-8c10-d231efb70ad1',
       payload: { 
         senha: "senhafuncionario1",
         confirmacaoSenha: "senhafuncionario1",
@@ -281,24 +281,36 @@ describe('PUT de Funcionario na rota /funcionarios/:id com id invalido', () => {
 /************* TESTES DE REMOÇÃO DE FUNCIONARIOS POR ID *************/
 
 describe('DELETE de Funcionario na rota /funcionarios/:id com id valido', () => {
-  test('Deve dar sucesso no DELETE de um funcionario', async () => {
+  test('Deve dar SUCESSO no DELETE de um funcionario', async () => {
     const app = build();
 
     const response = await app.inject({
       method: 'DELETE',
-      url: '/funcionarios/1'
+      url: '/funcionarios/b57a9ded-dd1e-44ba-8c10-d231efb70ad1'
     });
     expect(response.statusCode).toBe(200);
   });
 }); 
 
 describe('DELETE de Funcionario na rota /funcionarios/:id com id invalido', () => {
-  test('Deve dar falha no DELETE de um funcionario', async () => {
+  test('Deve dar FALHA no DELETE de um funcionario', async () => {
     const app = build();
 
     const response = await app.inject({
       method: 'DELETE',
-      url: '/funcionarios/10'
+      url: '/funcionarios/AAA'
+    });
+    expect(response.statusCode).toBe(422);
+  });
+}); 
+
+describe('DELETE de Funcionario na rota /funcionarios/:id com id valido porem não registrado', () => {
+  test('Deve dar FALHA no DELETE de um funcionario', async () => {
+    const app = build();
+
+    const response = await app.inject({
+      method: 'DELETE',
+      url: '/funcionarios/54d268a8-a397-4b1d-b116-18c53059566c'
     });
     expect(response.statusCode).toBe(404);
   });

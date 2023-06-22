@@ -102,7 +102,6 @@ const atualizarFuncionario = async (request, reply) => {
       const funcionarioAtualizado = { ...funcionario, ...dadosAtualizados }
       funcionarios[funcionarios.indexOf(funcionario)] = { ...funcionario, ...dadosAtualizados }
   
-      return reply.send(funcionarioAtualizado)
       return reply.status(200).send("Dados Atualizados")
 
     } catch (error) {
@@ -111,25 +110,49 @@ const atualizarFuncionario = async (request, reply) => {
     }
   }
 
-const removerFuncionario = async(request, reply) => {
-    try{
+  const removerFuncionario = async(request, reply) => {
+    try {
     const id = request.params.id
-    //console.log("ID a ser removido: "+id)
     const funcionario = funcionarios.find(c => c.id === id)
+    //Verificando campos ID
+    const resultadoVerificacaoID = await validarID(id);
+    if (!resultadoVerificacaoID.success) {
+      return reply.status(resultadoVerificacaoID.status).send(resultadoVerificacaoID.message);
+    } 
 
     if (!funcionario) {
-    return reply.status(404).send('Funcionario não encontrado')
+      console.log("teste funcionario")
+      return reply.status(404).send({
+        codigo: "404",
+        mensagem: "Requisição não encontrada."
+      });
     }
 
     //Remover apenas um elemento a partir do indice
     funcionarios.splice(funcionarios.indexOf(funcionario),1)
-
     return reply.status(200).send("Funcionario removido")
     
     } catch (error) {
-        //console.error(error)
-        reply.status(500).send('Erro ao obter funcionario')
-  }
+      console.error(error);
+      reply.status(404).send({
+        codigo: "404",
+        mensagem: "Requisição não encontrada."
+      });
+    }
+}
+
+/************ VALIDAR ID *************/
+
+const validarID = async (id) => {
+  if (id.length!=36) { 
+    return ({
+    success: false,
+    status: 422,
+    message: 'Dados inválidos. ID invalido.',
+    });
+  } else {
+    return {success: true};
+  };
 }
 
 /*************** EMAIL ***************/
@@ -198,7 +221,6 @@ const verificarConfirmacaoSenha = (novoFuncionario) => {
   }
   return { success: true };
 };
-
 
 module.exports = {
     getFuncionarios,
