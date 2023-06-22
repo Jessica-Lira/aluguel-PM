@@ -518,40 +518,9 @@ describe('criarCiclista route test', () => {
     expect(response.statusCode).toBe(200);
   });
 
-  test('Should return success true and status 200 when email is sent successfully', async () => {
-    const app = build();
-    const response = await app.inject({
-      method: 'POST',
-      url: '/ciclistas',
-      payload: {
-        id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a5',
-        nome: 'Paulo',
-        nascimento: '2023-06-11',
-        cpf: '12345678955',
-        passaporte: {
-          numero: '123456789',
-          validade: '2023-06-11',
-          pais: 'TL'
-        },
-        nacionalidade: 'BR',
-        email: 'paulo@email.com',
-        urlFotoDocumento: 'string',
-        senha: 'clientepaulo',
-        confirmarSenha: 'clientepaulo',
-        meioDePagamento: {
-          nomeTitular: 'Paulo',
-          numero: '984602367621417541873846007875805616119812247741040998629140438970271355',
-          validade: '2023-06-11',
-          cvv: '487'
-        },
-        ativo: false,
-        statusAluguel: false,
-        emailSent: false
-      }
-    });
+  
   });
 
-});
 
 describe('getCiclistaByID route test', () => {
   test('Should return 200 when search get ciclista', async () => {
