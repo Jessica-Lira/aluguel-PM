@@ -1,5 +1,3 @@
-const { v4: uuidv4 } = require('uuid');
-
 let ciclistas = [
     {
       id: "1",
@@ -12,7 +10,7 @@ let ciclistas = [
         pais: "TX"
       },
       nacionalidade: "string",
-      email: "jgevelin@example.com",
+      email: "email@example.com",
       urlFotoDocumento: "string",
       senha: "string",
       meioDePagamento: {
@@ -22,7 +20,7 @@ let ciclistas = [
         cvv: "4857"
       },
       ativo: false,
-      statusAluguel: false
+      statusAluguel: false,
     },
     {
       id: "2",
@@ -44,7 +42,7 @@ let ciclistas = [
         validade: "2023-06-11",
         cvv: "4857"
       },
-      ativo: false,
+      ativo: true,
       statusAluguel: true
     },
     {
@@ -92,6 +90,29 @@ let ciclistas = [
       },
       ativo: true,
       statusAluguel: false
+    },
+    {
+      id: "5",
+      nome: "User5",
+      nascimento: "2023-06-11",
+      cpf: "87942565300", 
+      passaporte: {
+        numero: "string",
+        validade: "2023-06-11",
+        pais: "TX"
+      },
+      nacionalidade: "string",
+      email: "user5@example.com",
+      urlFotoDocumento: "string",
+      senha: "string",
+      meioDePagamento: {
+        nomeTitular: "string",
+        numero: "984602367621417541873846007875805616119812247741040998629140438970271355",
+        validade: "2023-06-11",
+        cvv: "4857"
+      },
+      ativo: false,
+      statusAluguel: false,
     },
 ];
 

@@ -1,6 +1,8 @@
 const { v4: uuidv4 } = require('uuid');
 const { ciclistas } = require('../data.js');
 
+//alugar e devolver
+
 const getCiclistas = async (request, reply) => { //metodo aux , nao tem cdu
   try {
     return reply.status(200).send(ciclistas);
@@ -29,6 +31,11 @@ const criarCiclista = async (request, reply) => {
 
     const camposObrigatorios = ['email', 'nacionalidade', 'nascimento', 'nome', 'senha', 'confirmarSenha', 'meioDePagamento'];
     if (!verificarCamposObrigatorios(novoCiclista, camposObrigatorios)) {
+      return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.');
+    }
+    if (novoCiclista.meioDePagamento.nomeTitular === '' || 
+    novoCiclista.meioDePagamento.cvv ==='' || 
+    novoCiclista.meioDePagamento.numero === '' || novoCiclista.meioDePagamento.validade ==='') {
       return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.');
     }
   
@@ -75,13 +82,9 @@ const getCiclistaById = async(request, reply) => {
 
     const dadosCiclista = getDadosCiclista(ciclista);
 
-    return reply.send(dadosCiclista);
+    return reply.status(200).send(dadosCiclista);
   } catch (error) {
-    console.error(error);
-    reply.status(404).send({
-      codigo: "404",
-      mensagem: "Requisição não encontrada."
-    });
+    reply.status(404).send({ codigo: "404", mensagem: "Requisição não encontrada."});
   }
 };
 
@@ -95,7 +98,7 @@ const atualizarCiclista = async(request, reply) => {
       return reply.status(404).send('Ciclista não encontrado');
     }
 
-if (dadosAtualizados.nacionalidade === 'BR' && (!dadosAtualizados.cpf || dadosAtualizados.cpf.length !== 11) || 
+if ( (dadosAtualizados.nacionalidade === 'BR' && (!dadosAtualizados.cpf || dadosAtualizados.cpf.length !== 11)) || 
     (!dadosAtualizados.passaporte?.numero || !dadosAtualizados.passaporte?.pais)) {
   return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios corretamente.');
 }
@@ -141,7 +144,7 @@ const ativarCadastroCiclista = async (request, reply) => {
 const permiteAluguel = async (request, reply) => {
   try {
     const { id } = request.params;
-    const ciclista = ciclistas.find(c => c.id === id && c.ativo);
+    const ciclista = ciclistas.find(c => c.id === id);
 
     if (!ciclista) {
       return reply.status(404).send({
@@ -150,17 +153,21 @@ const permiteAluguel = async (request, reply) => {
       });
     }
     
-    const opcaoAluguel = ciclista.statusAluguel;
-    if (opcaoAluguel === true) {
+    if (ciclista.statusAluguel === true) {
       return reply.status(422).send({
         codigo: '422',
         mensagem: 'Ciclista já possui um aluguel em andamento'
       });
     }
 
-    const cadastroAtivo = !!ciclista.ativo;
+    if (ciclista.ativo === false) {
+      return reply.status(422).send({
+        codigo: '422',
+        mensagem: 'Ciclista inativo. Ative sua conta.'
+      });
+    }
 
-    return reply.status(200).send(cadastroAtivo);
+    return reply.status(200).send("Escolha uma bike para alugar.");
 
   } catch (error) {
     console.error(error);
@@ -187,8 +194,7 @@ const verificarEmail = async (email) => {
     };
   }
 
-  const emailEmUso = ciclistas.find((c) => c.email === email);
-  if (emailEmUso) {
+  if (ciclistas.find((c) => c.email === email)) {
     return {
       success: false,
       status: 200,
@@ -236,6 +242,7 @@ const atualizarCartaoCredito = async (request, reply) => {
       return reply.status(404).send('Ciclista não encontrado');
     }
 
+    //cartao aprovado/reprovado
     const isValid = verificarCartaoCredito(dadosAtualizados);
     if (!isValid) {
       return reply.status(422).send('Dados inválidos. Forneça um cartão válido.');
@@ -252,6 +259,7 @@ const atualizarCartaoCredito = async (request, reply) => {
   } catch (error) {
     console.error(error);
     reply.status(422).send('Dados inválidos');
+
   }
 };
 
@@ -276,9 +284,8 @@ const getDadosCiclista = (ciclista) => {
 
 const verificarNacionalidade = async (novoCiclista) => {
   const { nacionalidade } = novoCiclista;
-
 if (nacionalidade?.toUpperCase() === 'BR') {
-  if (!novoCiclista.cpf || novoCiclista.cpf.length !== 11) {
+  if (novoCiclista.cpf === '' || novoCiclista.cpf.length !== 11) {
     return {
       success: false,
       status: 422,
@@ -292,7 +299,6 @@ if (nacionalidade?.toUpperCase() === 'BR') {
       message: 'Dados inválidos. O passaporte deve ser preenchido corretamente.',
     };
 }
-
   return { success: true };
 };
 
@@ -344,7 +350,7 @@ const verificarCamposObrigatorios = (objeto, campos) => {
 const enviarEmail = async (email, mensagem) => {
   try {
     // Envio de e-mail vi API
-    return { success: true, status: 200, message: 'E-mail enviado com sucesso.' };
+    return { success: true, status: 200, message: 'E-mail enviado com sucesso.'};
   } catch (error) {
     return { success: false, status: 500, message: 'Não foi possível enviar o e-mail.'};
   }
