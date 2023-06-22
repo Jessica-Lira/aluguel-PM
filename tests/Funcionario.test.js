@@ -16,8 +16,10 @@ describe('requests the "/funcionarios" route', () => {
   })
 })
 
+/************* TESTES DE POST DE FUNCIONARIO *************/
+
 describe('POST de Funcionario na rota /funcionarios', () => {
-  test('Deve postar um funcionario', async () => {
+  test('Deve dar SUCESSO no POST de um funcionario', async () => {
     const app = build();
 
     const response = await app.inject({
@@ -37,29 +39,29 @@ describe('POST de Funcionario na rota /funcionarios', () => {
   });
 });
 
-/************* TESTES DE EMAIL *************/
+//CAMPOS DE E-MAIL
 
-describe('POST de Funcionario na rota /funcionarios sem email', () => {
-  test('Deve dar erro de post de um funcionario', async () => {
+describe('POST de Funcionario na rota /funcionarios SEM EMAIL', () => {
+  test('Deve dar ERRO no POST de um funcionario', async () => {
     const app = build();
 
     const response = await app.inject({
       method: 'POST',
       url: '/funcionarios',
       payload: { 
-        senha: "senhafuncionario6",
-        confirmacaoSenha: "senhafuncionario6",
-        nome: "funcionario6",
+        senha: "senhafuncionario7",
+        confirmacaoSenha: "senhafuncionario7",
+        nome: "funcionario7",
         idade: 0,
         funcao: "funcionario",
-        cpf: "cpfdofuncionario6"
+        cpf: "cpfdofuncionario7"
     }});
-
+    console.log(response.body)
     expect(response.statusCode).toBe(422);
   });
 }); 
 
-describe('POST de Funcionario na rota /funcionarios com email invalido', () => {
+describe('POST de Funcionario na rota /funcionarios com EMAIL INVALIDO', () => {
   test('Deve dar erro de post de um funcionario', async () => {
     const app = build();
 
@@ -67,20 +69,20 @@ describe('POST de Funcionario na rota /funcionarios com email invalido', () => {
       method: 'POST',
       url: '/funcionarios',
       payload: { 
-        senha: "senhafuncionario6",
-        confirmacaoSenha: "senhafuncionario6",
-        email: "funcionario6email",
-        nome: "funcionario6",
+        senha: "senhafuncionario8",
+        confirmacaoSenha: "senhafuncionario8",
+        email: "funcionario8email",
+        nome: "funcionario8",
         idade: 0,
         funcao: "funcionario",
-        cpf: "cpfdofuncionario6"
+        cpf: "cpfdofuncionario8"
     }});
-
+    console.log(response.body)
     expect(response.statusCode).toBe(422);
   });
 }); 
 
-describe('POST de Funcionario na rota /funcionarios com email repetido', () => {
+describe('POST de Funcionario na rota /funcionarios com EMAIL REPETIDO', () => {
   test('Deve dar erro de post de um funcionario', async () => {
     const app = build();
 
@@ -88,22 +90,22 @@ describe('POST de Funcionario na rota /funcionarios com email repetido', () => {
       method: 'POST',
       url: '/funcionarios',
       payload: { 
-        senha: "senhafuncionario6",
-        confirmacaoSenha: "senhafuncionario6",
+        senha: "senhafuncionario9",
+        confirmacaoSenha: "senhafuncionario9",
         email: "funcionario1@example.com",
-        nome: "funcionario6",
+        nome: "funcionario9",
         idade: 0,
         funcao: "funcionario",
-        cpf: "cpfdofuncionario6"
+        cpf: "cpfdofuncionario9"
     }});
-
+    console.log(response.body)
     expect(response.statusCode).toBe(422);
   });
 });  
 
-/************* TESTES DE CAMPOS OBRIGATÓRIOS *************/
+//CAMPOS OBRIGATÓRIOS
 
-describe('POST de Funcionario na rota /funcionarios sem campo obrigatório SENHA', () => {
+describe('POST de Funcionario na rota /funcionarios SEM CAMPOS DE SENHA E NOME', () => {
   test('Deve dar erro de post de um funcionario', async () => {
     const app = build();
 
@@ -111,19 +113,17 @@ describe('POST de Funcionario na rota /funcionarios sem campo obrigatório SENHA
       method: 'POST',
       url: '/funcionarios',
       payload: { 
-        confirmacaoSenha: "senhafuncionario6",
-        email: "funcionario1@example.com",
-        nome: "funcionario6",
+        email: "funcionario10@example.com",
         idade: 0,
         funcao: "funcionario",
-        cpf: "cpfdofuncionario6"
+        cpf: "cpfdofuncionario10"
     }});
-
+    console.log(response.body)
     expect(response.statusCode).toBe(422);
   });
 });  
 
-describe('POST de Funcionario na rota /funcionarios sem campo CONFIRMAÇÃO SENHA', () => {
+describe('POST de Funcionario na rota /funcionarios COM SENHAS DIFERENTES', () => {
   test('Deve dar erro de post de um funcionario', async () => {
     const app = build();
 
@@ -131,14 +131,15 @@ describe('POST de Funcionario na rota /funcionarios sem campo CONFIRMAÇÃO SENH
       method: 'POST',
       url: '/funcionarios',
       payload: { 
-        senha: "senhafuncionario6",
-        email: "funcionario1@example.com",
-        nome: "funcionario6",
+        senha: "senhafuncionario11",
+        confirmacaoSenha: "senha11",
+        email: "funcionario11@example.com",
+        nome: "funcionario11",
         idade: 0,
         funcao: "funcionario",
-        cpf: "cpfdofuncionario6"
+        cpf: "cpfdofuncionario11"
     }});
-
+    console.log(response.body)
     expect(response.statusCode).toBe(422);
   });
 });  
@@ -208,8 +209,8 @@ describe('POST de Funcionario na rota /funcionarios com senhas diferentes', () =
 
 /************* TESTES DE BUSCA DE FUNCIONARIOS POR ID *************/
 
-describe('GET de Funcionario na rota /funcionarios/:id com id valido', () => {
-  test('Deve dar sucesso no GET de um funcionario', async () => {
+describe('GET de Funcionario na rota /funcionarios/:id com id VALIDO', () => {
+  test('Deve dar SUCESSO no GET de um funcionario', async () => {
     const app = build();
 
     const response = await app.inject({
@@ -221,8 +222,8 @@ describe('GET de Funcionario na rota /funcionarios/:id com id valido', () => {
   });
 });  
 
-describe('GET de Funcionario na rota /funcionarios/:id com id invalido', () => {
-  test('Deve dar falha no GET de um funcionario', async () => {
+describe('GET de Funcionario na rota /funcionarios/:id com id INVALIDO', () => {
+  test('Deve dar FALHA no GET de um funcionario', async () => {
     const app = build();
 
     const response = await app.inject({
@@ -231,6 +232,19 @@ describe('GET de Funcionario na rota /funcionarios/:id com id invalido', () => {
     });
 
     expect(response.statusCode).toBe(422);
+  });
+}); 
+
+describe('GET de Funcionario na rota /funcionarios/:id com id INEXISTENTE', () => {
+  test('Deve dar FALHA no GET de um funcionario', async () => {
+    const app = build();
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/funcionarios/54d268a8-a397-4b1d-b116-18c53059566c'
+    });
+
+    expect(response.statusCode).toBe(404);
   });
 }); 
 
@@ -304,7 +318,7 @@ describe('DELETE de Funcionario na rota /funcionarios/:id com id invalido', () =
   });
 }); 
 
-describe('DELETE de Funcionario na rota /funcionarios/:id com id valido porem não registrado', () => {
+describe('DELETE de Funcionario na rota /funcionarios/:id com id INEXISTENTE', () => {
   test('Deve dar FALHA no DELETE de um funcionario', async () => {
     const app = build();
 

@@ -2,7 +2,6 @@ const { v4: uuidv4 } = require('uuid');
 const { v1: uuidv1 } = require('uuid');
 const { funcionarios } = require('../data.js');
 
-//Não precisa
 const getFuncionarios = async (request, reply) => {
     try {
       return reply.status(200).send(funcionarios)
@@ -23,9 +22,10 @@ const criarFuncionario = async (request, reply) => {
       //Verificando Email
       const resultadoVerificacaoEmail = await verificarEmail(novoFuncionario.email);
       if (!resultadoVerificacaoEmail.success) {
+        //console.log("Verificando Email na criação de Funcionario")
         return reply.status(resultadoVerificacaoEmail.status).send(resultadoVerificacaoEmail.message);
       }
-
+      
       //Verificando campos obrigatórios
       const camposObrigatorios = ['email', 'nome', 'senha', 'confirmacaoSenha'];
       const resultadoVerificacaoCamposObrigatorios = await verificarCamposObrigatorios(novoFuncionario, camposObrigatorios);
@@ -52,28 +52,25 @@ const criarFuncionario = async (request, reply) => {
 const getFuncionarioById = async (request, reply) => {
     try {
         const id = request.params.id
-        const funcionario = funcionarios.find(c => c.id === id)
 
-        const dadosFuncionario = {
-          matricula: funcionario.matricula,
-          senha: funcionario.senha,
-          confirmacaoSenha: funcionario.confirmacaoSenha,
-          email: funcionario.confirmacaoSenha,
-          nome: funcionario.nome,
-          idade: funcionario.idade,
-          funcao: funcionario.funcao,
-          cpf: funcionario.cpf
-        }
+        const resultadoVerificacaoID = await validarID(id);
+        if (!resultadoVerificacaoID.success) {
+          //console.log("Verificando ID valido no GET")
+          return reply.status(resultadoVerificacaoID.status).send(resultadoVerificacaoID.message);
+        } 
 
-        if (!funcionario){
-        return reply.status(404).send('Funcionario não encontrado')
-        }
+        const funcionario = funcionarios.find(f => f.id === id)
+        //console.log("Funcionario: "+funcionario)
+        const dadosFuncionario = getDadosFuncionario(funcionario)
 
         return reply.status(200).send(dadosFuncionario)
 
     } catch (error) {
         //console.error(error)
-        reply.status(422).send('Erro ao obter funcionario')
+        reply.status(404).send({
+          codigo: "404",
+          mensagem: "Funcionario não encontrado."
+        });
     }
 }
 
@@ -114,6 +111,7 @@ const atualizarFuncionario = async (request, reply) => {
     try {
     const id = request.params.id
     const funcionario = funcionarios.find(c => c.id === id)
+    
     //Verificando campos ID
     const resultadoVerificacaoID = await validarID(id);
     if (!resultadoVerificacaoID.success) {
@@ -121,7 +119,6 @@ const atualizarFuncionario = async (request, reply) => {
     } 
 
     if (!funcionario) {
-      console.log("teste funcionario")
       return reply.status(404).send({
         codigo: "404",
         mensagem: "Requisição não encontrada."
@@ -158,16 +155,20 @@ const validarID = async (id) => {
 /*************** EMAIL ***************/
 
 const verificarEmail = async (email) => {
-  if (!email) {
+  
+    if (!email) {
+    //console.log("verificar se tem email")
     return ({
       success: false,
       status: 422,
-      message: 'E-mail não fornecido',
+      message: 'Dados inválidos. E-mail não fornecido',
     });
   }
 
   const EmailValido = validarFormatoEmail(email);
+  
   if (!EmailValido) {
+    //console.log("validando formato Email")
     return {
       success: false,
       status: 422,
@@ -175,8 +176,9 @@ const verificarEmail = async (email) => {
     };
   }
 
-  const emailEmUso = funcionarios.find((c) => c.email === email);
+  const emailEmUso = funcionarios.find((f) => f.email === email);
   if (emailEmUso) {
+    //console.log("Verificando se Email esta em uso")
     return {
       success: false,
       status: 422,
@@ -188,6 +190,7 @@ const verificarEmail = async (email) => {
 };
 
 const validarFormatoEmail = (email) => {
+  //console.log("Email Regex")
   const emailRegex = /^\S+@\S+\.\S+$/;
   return emailRegex.test(email);
 };
@@ -195,6 +198,7 @@ const validarFormatoEmail = (email) => {
 /*************** CAMPOS OBRIGATORIOS ***************/
 
 const verificarCamposObrigatorios = (objeto, campos) => {
+  //console.log("Verificando campos obrigatórios")
   for (const campo of campos) {
     if (!objeto[campo]) {
       return {
@@ -220,6 +224,21 @@ const verificarConfirmacaoSenha = (novoFuncionario) => {
     };
   }
   return { success: true };
+};
+
+/*************** BUSCA DE DADOS DE FUNCIONARIOS ***************/
+
+const getDadosFuncionario = (funcionario) => {
+  return {
+    matricula: funcionario.matricula,
+    senha: funcionario.senha,
+    confirmacaoSenha: funcionario.confirmacaoSenha,
+    email: funcionario.confirmacaoSenha,
+    nome: funcionario.nome,
+    idade: funcionario.idade,
+    funcao: funcionario.funcao,
+    cpf: funcionario.cpf
+  };
 };
 
 module.exports = {
