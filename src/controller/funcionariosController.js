@@ -183,15 +183,6 @@ const validarID = async (id) => {
 
 const verificarEmail = async (email) => {
   
-/*     if (!email) {
-    //console.log("verificar se tem email")
-    return ({
-      success: false,
-      status: 422,
-      mensagem: 'Dados inválidos. E-mail não fornecido',
-    });
-  } */
-
   const EmailValido = validarFormatoEmail(email);
   
   if (!EmailValido) {
