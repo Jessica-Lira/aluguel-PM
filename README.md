@@ -88,7 +88,10 @@ $ npm test
 <h4 align="center">
   Você pode visualizar a aplicação funcionando através do link: <br>
 
-  <a target="_blank">[Microsserviço ALUGUEL](https://sore-jade-clownfish-veil.cyclic.app/helloWorld)</a>
+  <a target="_blank">[Cyclic Microsserviço ALUGUEL](https://sore-jade-clownfish-veil.cyclic.app/helloWorld)</a>
+
+  Você pode verificar o sonar em: <br>
+<a target="_blank">[Sonar microsserviço ALUGUEL](https://sonarcloud.io/summary/overall?id=Jessica-Lira_aluguel-PM)</a>
   
 </h4>
 
