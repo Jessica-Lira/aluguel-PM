@@ -1,11 +1,21 @@
 'use strict';
 
 const { build } = require('../src/app');
+const {bodyCiclista, bodyCiclistaSemEmail, bodyCiclistaFormatoEmailErrado, bodyCiclistaInvalidPassaport,
+  bodyCiclistaEmailJaEmUso, bodyCartaoInvalido
+} = require("./ciclistaMock");
+const app = build();
+
+const callCriarCiclista = async (body) => {
+  return await app.inject({
+    method: 'POST',
+    url: '/ciclistas',
+    payload: body
+  })
+};
 
 describe('getCiclistas route test', () => {
   test('Should return the list of cyclists when called', async () => {
-    const app = build();
-
     const response = await app.inject({
       method: 'GET',
       url: '/ciclistas'
@@ -15,8 +25,6 @@ describe('getCiclistas route test', () => {
   });
 
   test('Should return error when wrong url called', async () => {
-    const app = build();
-
     const response = await app.inject({
       method: 'GET',
       url: '/ciclista'
@@ -28,140 +36,46 @@ describe('getCiclistas route test', () => {
 
 describe('criarCiclista route test', () => {
   test('Should create a new cyclist when all data is provided', async () => {
-    const app = build();
-    const response = await app.inject({
-    method: 'POST',
-    url: '/ciclistas',
-      payload: {
-        id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a5',
-        nome: 'Paulo',
-        nascimento: '2023-06-11',
-        cpf: '12345678955',
-        passaporte: {
-          numero: '123456789',
-          validade: '2023-06-11',
-          pais: 'TL'
-        },
-        nacionalidade: 'BR',
-        email: 'paulo@email.com',
-        urlFotoDocumento: 'string',
-        senha: 'clientepaulo',
-        confirmarSenha: 'clientepaulo',
-        meioDePagamento: {
-          nomeTitular: 'Paulo',
-          numero: '1234512345123456',
-          validade: '2023-06-11',
-          cvv: '487'
-        },
-        ativo: false,
-      }
+    const response = await callCriarCiclista(bodyCiclista);
+
+    expect(response.statusCode).toBe(201);
   });
 
-  expect(response.statusCode).toBe(201);
+  test('Should return 404 erro when no data is provided', async () => {
+    const response = await callCriarCiclista(undefined);
+
+    expect(response.statusCode).toBe(404);
   });
 
   test('Should return 400 when without EMAIL', async () => {
-    const app = build();
-
-    const response = await app.inject({
-      method: 'POST',
-      url: '/ciclistas',
-      payload: {
-        id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
-        nome: "Ciclista B",
-        nascimento: "2023-06-11",
-        cpf: "87942565301", 
-        passaporte: {
-          numero: "string",
-          validade: "2023-06-11",
-          pais: "TX"
-        },
-        nacionalidade: "string",
-        email: "",
-        urlFotoDocumento: "string",
-        senha: "string",
-        confirmarSenha: "string",
-        meioDePagamento: {
-          nomeTitular: "ciclista B",
-          numero: "984602367621417541873846007875805616119812247741040998629140438970271355",
-          validade: "2023-06-11",
-          cvv: "455"
-        },
-        ativo: false,
-        }
-    });
+    const response = await callCriarCiclista(bodyCiclistaSemEmail);
 
     expect(response.statusCode).toBe(400);
   });
 
-  test('Should return 422 when wrong format EMAIL', async () => {
-    const app = build();
-
-    const response = await app.inject({
-      method: 'POST',
-      url: '/ciclistas',
-      payload: {
-        id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
-        nome: "Ciclista C",
-        nascimento: "2023-06-11",
-        cpf: "87942565301", 
-        passaporte: {
-          numero: "string",
-          validade: "2023-06-11",
-          pais: "TX"
-        },
-        nacionalidade: "string",
-        email: "ciclistac.com",
-        urlFotoDocumento: "string",
-        senha: "string",
-        confirmarSenha: "string",
-        meioDePagamento: {
-          nomeTitular: "ciclista C",
-          numero: "984602367621417541873846007875805616119812247741040998629140438970271356",
-          validade: "2023-06-11",
-          cvv: "455"
-        },
-        ativo: false,
-        }
-    });
+  test('Should return 422 when wrong EMAIL format', async () => {
+    const response = await callCriarCiclista(bodyCiclistaFormatoEmailErrado);
 
     expect(response.statusCode).toBe(422);
   });
-  
-  test('Should return message when EMAIL is used by another cyclist', async () => {
-    const app = build();
-    const response = await app.inject({
-      method: 'POST',
-      url: '/ciclistas',
-      payload: {
-        id: "9",
-        nome: "Paulo",
-        nascimento: "2023-06-11",
-        cpf: "12345678955",
-        passaporte: {
-          numero: "string",
-          validade: "2023-06-11",
-          pais: "TL"
-        },
-        nacionalidade: "BR",
-        email: "jgevelin@example.com",
-        urlFotoDocumento: "string",
-        senha: "string",
-        confirmarSenha: "string",
-        meioDePagamento: {
-          nomeTitular: "string",
-          numero: "1234512345123456",
-          validade: "2023-06-11",
-          cvv: "4857"
-        },
-        "ativo": false,
-        "statusAluguel": false
-        }
-    });
 
-    expect(response.statusCode).toBe(201);
+  test('Should return 422 for non-Brazilian nationality with invalid passport', async () => {
+    const response = await callCriarCiclista(bodyCiclistaInvalidPassaport);
+    expect(response.statusCode).toBe(422);
   });
-  
+
+  test('Should return 422 for invalid credit card', async () => {
+    const response = await callCriarCiclista(bodyCartaoInvalido);
+    expect(response.statusCode).toBe(422);
+  });
+
+  test('Should return message when EMAIL is used by another cyclist', async () => {
+    const response = await callCriarCiclista(bodyCiclistaEmailJaEmUso);
+
+    expect(response.body).toBe('E-mail já está em uso por outro ciclista. Escolha um e-mail diferente.')
+    expect(response.statusCode).toBe(200);
+  });
+
   test('Should return 422 when without NASCIMENTO', async () => {
     const app = build();
 
@@ -172,7 +86,7 @@ describe('criarCiclista route test', () => {
         id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
         nome: "Ciclista D",
         nascimento: "",
-        cpf: "87942565301", 
+        cpf: "87942565301",
         passaporte: {
           numero: "string",
           validade: "2023-06-11",
@@ -190,7 +104,7 @@ describe('criarCiclista route test', () => {
           cvv: "455"
         },
         ativo: false,
-        }
+      }
     });
 
     expect(response.statusCode).toBe(422);
@@ -206,7 +120,7 @@ describe('criarCiclista route test', () => {
         id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
         nome: "",
         nascimento: "2023-06-11",
-        cpf: "87942565301", 
+        cpf: "87942565301",
         passaporte: {
           numero: "string",
           validade: "2023-06-11",
@@ -224,7 +138,7 @@ describe('criarCiclista route test', () => {
           cvv: "455"
         },
         ativo: false,
-        }
+      }
     });
 
     expect(response.statusCode).toBe(422);
@@ -240,7 +154,7 @@ describe('criarCiclista route test', () => {
         id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
         nome: "Ciclista E",
         nascimento: "2023-06-11",
-        cpf: "87942565301", 
+        cpf: "87942565301",
         passaporte: {
           numero: "string",
           validade: "2023-06-11",
@@ -258,7 +172,7 @@ describe('criarCiclista route test', () => {
           cvv: "455"
         },
         ativo: false,
-        }
+      }
     });
 
     expect(response.statusCode).toBe(422);
@@ -274,7 +188,7 @@ describe('criarCiclista route test', () => {
         id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
         nome: "Ciclista E",
         nascimento: "2023-06-11",
-        cpf: "87942565301", 
+        cpf: "87942565301",
         passaporte: {
           numero: "string",
           validade: "2023-06-11",
@@ -292,7 +206,7 @@ describe('criarCiclista route test', () => {
           cvv: "455"
         },
         ativo: false,
-        }
+      }
     });
 
     expect(response.statusCode).toBe(422);
@@ -308,7 +222,7 @@ describe('criarCiclista route test', () => {
         id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
         nome: "Ciclista E",
         nascimento: "2023-06-11",
-        cpf: "87942565301", 
+        cpf: "87942565301",
         passaporte: {
           numero: "string",
           validade: "2023-06-11",
@@ -326,7 +240,7 @@ describe('criarCiclista route test', () => {
           cvv: "455"
         },
         ativo: false,
-        }
+      }
     });
 
     expect(response.statusCode).toBe(422);
@@ -342,7 +256,7 @@ describe('criarCiclista route test', () => {
         id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
         nome: "Ciclista E",
         nascimento: "2023-06-11",
-        cpf: "87942565301", 
+        cpf: "87942565301",
         passaporte: {
           numero: "string",
           validade: "2023-06-11",
@@ -360,7 +274,7 @@ describe('criarCiclista route test', () => {
           cvv: ""
         },
         ativo: false,
-        }
+      }
     });
 
     expect(response.statusCode).toBe(422);
@@ -376,7 +290,7 @@ describe('criarCiclista route test', () => {
         id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
         nome: "Ciclista E",
         nascimento: "2023-06-11",
-        cpf: "87942565301", 
+        cpf: "87942565301",
         passaporte: {
           numero: "string",
           validade: "2023-06-11",
@@ -394,7 +308,7 @@ describe('criarCiclista route test', () => {
           cvv: "689"
         },
         ativo: false,
-        }
+      }
     });
 
     expect(response.statusCode).toBe(422);
@@ -410,7 +324,7 @@ describe('criarCiclista route test', () => {
         id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
         nome: "Ciclista E",
         nascimento: "2023-06-11",
-        cpf: "87942565301", 
+        cpf: "87942565301",
         passaporte: {
           numero: "string",
           validade: "2023-06-11",
@@ -428,7 +342,7 @@ describe('criarCiclista route test', () => {
           cvv: "678"
         },
         ativo: false,
-        }
+      }
     });
 
     expect(response.statusCode).toBe(422);
@@ -444,7 +358,7 @@ describe('criarCiclista route test', () => {
         id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
         nome: "Ciclista E",
         nascimento: "2023-06-11",
-        cpf: "87942565301", 
+        cpf: "87942565301",
         passaporte: {
           numero: "string",
           validade: "2023-06-11",
@@ -462,7 +376,7 @@ describe('criarCiclista route test', () => {
           cvv: "111"
         },
         ativo: false,
-        }
+      }
     });
 
     expect(response.statusCode).toBe(422);
@@ -478,7 +392,7 @@ describe('criarCiclista route test', () => {
         id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
         nome: "Ciclista E",
         nascimento: "2023-06-11",
-        cpf: "87942565301", 
+        cpf: "87942565301",
         passaporte: {
           numero: "string",
           validade: "2023-06-11",
@@ -496,7 +410,7 @@ describe('criarCiclista route test', () => {
           cvv: ""
         },
         ativo: false,
-        }
+      }
     });
 
     expect(response.statusCode).toBe(422);
@@ -512,7 +426,7 @@ describe('criarCiclista route test', () => {
         id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
         nome: "Ciclista E",
         nascimento: "2023-06-11",
-        cpf: "87942565301", 
+        cpf: "87942565301",
         passaporte: {
           numero: "string",
           validade: "2023-06-11",
@@ -530,7 +444,7 @@ describe('criarCiclista route test', () => {
           cvv: "455"
         },
         ativo: false,
-        }
+      }
     });
 
     expect(response.statusCode).toBe(422);
@@ -546,7 +460,7 @@ describe('criarCiclista route test', () => {
         id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
         nome: "Ciclista F",
         nascimento: "2023-06-11",
-        cpf: "87942565301", 
+        cpf: "87942565301",
         passaporte: {
           numero: "string",
           validade: "2023-06-11",
@@ -564,7 +478,7 @@ describe('criarCiclista route test', () => {
           cvv: "455"
         },
         ativo: false,
-        }
+      }
     });
 
     expect(response.statusCode).toBe(201);
@@ -580,7 +494,7 @@ describe('criarCiclista route test', () => {
         id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
         nome: "Ciclista F",
         nascimento: "2023-06-11",
-        cpf: "", 
+        cpf: "",
         passaporte: {
           numero: "ABC123",
           validade: "2023-06-11",
@@ -598,7 +512,7 @@ describe('criarCiclista route test', () => {
           cvv: "455"
         },
         ativo: false,
-        }
+      }
     });
 
     expect(response.statusCode).toBe(200);
@@ -607,8 +521,8 @@ describe('criarCiclista route test', () => {
   test('Should return success true and status 200 when email is sent successfully', async () => {
     const app = build();
     const response = await app.inject({
-    method: 'POST',
-    url: '/ciclistas',
+      method: 'POST',
+      url: '/ciclistas',
       payload: {
         id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a5',
         nome: 'Paulo',
@@ -634,10 +548,10 @@ describe('criarCiclista route test', () => {
         statusAluguel: false,
         emailSent: false
       }
-  });
+    });
 
   });
-  
+
   /*
   test('Should return 422 for Brazilian nationality with invalid CPF', async () => {
     const app = build();
@@ -673,41 +587,6 @@ describe('criarCiclista route test', () => {
   });
 */
 
-/*
-  test('Should return 422 for non-Brazilian nationality with valid passport', async () => {
-    const app = build();
-
-    const response = await app.inject({
-      method: 'POST',
-      url: '/ciclistas',
-      payload: {
-        id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
-        nome: "Ciclista F",
-        nascimento: "2023-06-11",
-        cpf: "", 
-        passaporte: {
-          numero: "",
-          validade: "",
-          pais: ""
-        },
-        nacionalidade: "US",
-        email: "ciclistaf@example.com",
-        urlFotoDocumento: "string",
-        senha: "string",
-        confirmarSenha: "string",
-        meioDePagamento: {
-          nomeTitular: "ciclista E",
-          numero: "984602367621417541873846007875805616119812247741040998629140438970271356",
-          validade: "2023-06-11",
-          cvv: "455"
-        },
-        ativo: false,
-        }
-    });
-
-    expect(response.statusCode).toBe(201);
-  });
-*/
 });
 
 describe('getCiclistaByID route test', () => {
@@ -717,9 +596,9 @@ describe('getCiclistaByID route test', () => {
     const response = await app.inject({
       method: 'GET',
       url: '/ciclistas/1',
-      payload: { 
+      payload: {
         id: "1",
-    }});
+      }});
 
     expect(response.statusCode).toBe(200);
   });
@@ -730,9 +609,9 @@ describe('getCiclistaByID route test', () => {
     const response = await app.inject({
       method: 'GET',
       url: '/ciclistas/10',
-      payload: { 
+      payload: {
         id: 10
-    }});
+      }});
 
     expect(response.statusCode).toBe(422);
   });
@@ -754,7 +633,7 @@ describe('atualizarCiclista route test', () => {
     const app = build();
     const response = await app.inject({
       method: 'PUT',
-      url: '/ciclistas/4', 
+      url: '/ciclistas/4',
       payload: {
         id: '777',
         nome: 'Paulo',
@@ -786,7 +665,7 @@ describe('atualizarCiclista route test', () => {
     const app = build();
     const response = await app.inject({
       method: 'PUT',
-      url: '/ciclistas/88', 
+      url: '/ciclistas/88',
       payload: {
         id: '15',
         nome: 'john doe',
@@ -818,7 +697,7 @@ describe('atualizarCiclista route test', () => {
     const app = build();
     const response = await app.inject({
       method: 'PUT',
-      url: '/ciclistas/2', 
+      url: '/ciclistas/2',
       payload: {
         id: '2',
         nome: '',
@@ -851,7 +730,7 @@ describe('atualizarCiclista route test', () => {
 
     const response = await app.inject({
       method: 'PUT',
-      url: '/ciclistas/0c4e5a5d-7', 
+      url: '/ciclistas/0c4e5a5d-7',
       payload: {
         id: '0c4e5a5d',
         nome: 'Novo nome',
@@ -889,7 +768,7 @@ describe('atualizarCiclista route test', () => {
         id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
         nome: "Ciclista E",
         nascimento: "2023-06-11",
-        cpf: "87942565301", 
+        cpf: "87942565301",
         passaporte: {
           numero: "string",
           validade: "2023-06-11",
@@ -907,7 +786,7 @@ describe('atualizarCiclista route test', () => {
           cvv: "455"
         },
         ativo: false,
-        }
+      }
     });
     expect(response.statusCode).toBe(422);
   });
@@ -922,7 +801,7 @@ describe('atualizarCiclista route test', () => {
         id: '5',
         nome: "Ciclista F",
         nascimento: "2023-06-11",
-        cpf: "", 
+        cpf: "",
         passaporte: {
           numero: "string",
           validade: "2023-06-11",
@@ -940,7 +819,7 @@ describe('atualizarCiclista route test', () => {
           cvv: "455"
         },
         ativo: false,
-        }
+      }
     });
 
     expect(response.statusCode).toBe(200);
@@ -1012,7 +891,7 @@ describe('permiteAluguel route test', () => {
     expect(response.statusCode).toBe(422);
   });
 
-    test('Should return 422 for cyclist COM CONTA INATIVA mesmo sem aluguel em andamento', async () => {
+  test('Should return 422 for cyclist COM CONTA INATIVA mesmo sem aluguel em andamento', async () => {
     const app = build();
     const response = await app.inject({
       method: 'GET',
@@ -1020,10 +899,10 @@ describe('permiteAluguel route test', () => {
     });
     expect(response.statusCode).toBe(422);
   });
-  
+
 });
 
-describe('getCartaoCredito route test', () => { 
+describe('getCartaoCredito route test', () => {
   test('Should return the credit card information of a cyclist', async () => {
     const app = build();
     const response = await app.inject({
@@ -1032,7 +911,7 @@ describe('getCartaoCredito route test', () => {
     });
     expect(response.statusCode).toBe(200);
   });
-  
+
   test('Should return 404 if cyclist is not found', async () => {
     const app = build();
 
@@ -1050,7 +929,7 @@ describe('atualizarCartaoCredito route test', () => {
 
   test('Should update the credit card information of a cyclist', async () => {
     const app = build();
-    
+
     const response = await app.inject({
       method: 'PUT',
       url: '/ciclistas/atualizar-cartao/1',
@@ -1081,20 +960,20 @@ describe('atualizarCartaoCredito route test', () => {
 
     expect(response.statusCode).toBe(404);
   });
-/*
-  test('Should return 422 if credit card data is invalid', async () => {
-    const app = build();
-    const response = await app.inject({
-      method: 'PUT',
-      url: '/ciclistas/atualizar-cartao/5',
-      payload: {
-        nomeTitular: '',
-        numero: '9876',
-        validade: '2020-01-01',
-        cvv: '',
-      },
+  /*
+    test('Should return 422 if credit card data is invalid', async () => {
+      const app = build();
+      const response = await app.inject({
+        method: 'PUT',
+        url: '/ciclistas/atualizar-cartao/5',
+        payload: {
+          nomeTitular: '',
+          numero: '9876',
+          validade: '2020-01-01',
+          cvv: '',
+        },
+      });
+      expect(response.statusCode).toBe(422);
     });
-    expect(response.statusCode).toBe(422);
-  });
-*/
+  */
 });

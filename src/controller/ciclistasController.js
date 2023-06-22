@@ -16,7 +16,7 @@ const criarCiclista = async (request, reply) => {
   try {
     const { body: novoCiclista } = request;
 
-    if (!novoCiclista) {
+    if (novoCiclista === undefined) {
       return reply.status(404).send('Requisição mal formada. Dados não fornecidos.');
     }
 
@@ -327,9 +327,9 @@ const verificarCartaoCredito = (cartao) => {
 };
 
 const validarCartaoCredito = async (cartao) => {
-  // Lógica de validação do cartão de crédito real por API 
+  // Lógica de validação do cartão de crédito real por API
 
-  const cartaoAprovado = true; 
+  let cartaoAprovado = cartao.cvv !== "666";
 
   if (cartaoAprovado) {
     return { success: true, status: 200, message: '' };
