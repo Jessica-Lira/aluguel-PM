@@ -91,7 +91,7 @@ $ npm test
   <a target="_blank">[Cyclic Microsserviço ALUGUEL](https://sore-jade-clownfish-veil.cyclic.app/helloWorld)</a>
 
   Você pode verificar o sonar em: <br>
-<a target="_blank">[Sonar microsserviço ALUGUEL](https://sonarcloud.io/summary/overall?id=Jessica-Lira_aluguel-PM)</a>
+https://sonarcloud.io/project/overview?id=Jessica-Lira_aluguel-PM
   
 </h4>
 
