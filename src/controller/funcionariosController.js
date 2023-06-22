@@ -67,10 +67,7 @@ const getFuncionarioById = async (request, reply) => {
         //console.log("Funcionario: "+funcionario)
         const dadosFuncionario = getDadosFuncionario(funcionario)
 
-        return reply.status(200).send({
-          codigo: "200",
-          mensagem: "Dados Recuperados."
-        });
+        return reply.status(200).send(dadosFuncionario);
 
     } catch (error) {
         //console.error(error)
@@ -123,11 +120,8 @@ const atualizarFuncionario = async (request, reply) => {
       const funcionarioAtualizado = { ...funcionario, ...dadosAtualizados }
       funcionarios[funcionarios.indexOf(funcionario)] = { ...funcionario, ...dadosAtualizados }
   
-      return reply.status(200).send({
-        codigo: "200",
-        mensagem: "Dados Atualizados."
-      });
-
+      return reply.status(200).send(funcionarioAtualizado)
+    
     } catch (error) {
       //console.error(error)
       reply.status(404).send({
