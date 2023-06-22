@@ -348,12 +348,10 @@ const verificarCamposObrigatorios = (objeto, campos) => {
 };
 
 const enviarEmail = async (email, mensagem) => {
-  try {
+
     // Envio de e-mail vi API
     return { success: true, status: 200, message: 'E-mail enviado com sucesso.'};
-  } catch (error) {
-    return { success: false, status: 500, message: 'Não foi possível enviar o e-mail.'};
-  }
+
 };
 
 module.exports = {

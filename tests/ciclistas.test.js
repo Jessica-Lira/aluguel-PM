@@ -549,43 +549,7 @@ describe('criarCiclista route test', () => {
         emailSent: false
       }
     });
-
   });
-
-  /*
-  test('Should return 422 for Brazilian nationality with invalid CPF', async () => {
-    const app = build();
-
-    const response = await app.inject({
-      method: 'POST',
-      url: '/ciclistas',
-      payload: {
-        id: '16',
-        nome: "Ciclista F",
-        nascimento: "2023-06-11",
-        cpf: "15", 
-        passaporte: {
-          numero: "string",
-          validade: "2023-06-11",
-          pais: "BR"
-        },
-        nacionalidade: "BR",
-        email: "ciclistaf@example.com",
-        urlFotoDocumento: "string",
-        senha: "string",
-        confirmarSenha: "string",
-        meioDePagamento: {
-          nomeTitular: "ciclista E",
-          numero: "1234567812345678",
-          validade: "2023-06-11",
-          cvv: "455"
-        },
-        ativo: false,
-        }
-    });
-    expect(response.statusCode).toBe(422);
-  });
-*/
 
 });
 
@@ -960,20 +924,4 @@ describe('atualizarCartaoCredito route test', () => {
 
     expect(response.statusCode).toBe(404);
   });
-  /*
-    test('Should return 422 if credit card data is invalid', async () => {
-      const app = build();
-      const response = await app.inject({
-        method: 'PUT',
-        url: '/ciclistas/atualizar-cartao/5',
-        payload: {
-          nomeTitular: '',
-          numero: '9876',
-          validade: '2020-01-01',
-          cvv: '',
-        },
-      });
-      expect(response.statusCode).toBe(422);
-    });
-  */
 });
