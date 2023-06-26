@@ -10,7 +10,6 @@ const getCiclistas = async (request, reply) => { //metodo aux , nao tem cdu
   }
 };
 
-//STATUS ATIVO INATIVO OU ESPERANDO CONFIRMAÇÃO
 const criarCiclista = async (request, reply) => {
   try {
     const { body: novoCiclista } = request;
@@ -20,7 +19,7 @@ const criarCiclista = async (request, reply) => {
     }
 
     novoCiclista.id = uuidv4();
-    novoCiclista.ativo = false;
+    novoCiclista.ativo = false; //STATUS ATIVO INATIVO OU ESPERANDO CONFIRMAÇÃO
     novoCiclista.statusAluguel = false;
 
     const resultadoVerificacaoEmail = await verificarEmail(novoCiclista.email);
@@ -32,10 +31,21 @@ const criarCiclista = async (request, reply) => {
     if (!verificarCamposObrigatorios(novoCiclista, camposObrigatorios)) {
       return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.');
     }
+
+    const regexDataNascimento = /^\d{4}-\d{2}-\d{2}$/; // Verificar formato da data de nascimento (yyyy-MM-dd)
+    if (!regexDataNascimento.test(novoCiclista.nascimento)) {
+      return reply.status(422).send('Formato inválido para a data de nascimento. Use o formato yyyy-MM-dd.');
+    }
+
     if (novoCiclista.meioDePagamento.nomeTitular === '' || 
     novoCiclista.meioDePagamento.cvv ==='' || 
     novoCiclista.meioDePagamento.numero === '' || novoCiclista.meioDePagamento.validade ==='') {
       return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.');
+    }
+
+    const regexDataValidadeCartao = /^\d{4}-\d{2}$/; // Verificar formato da data de validade do cartão (yyyy-MM)
+    if (!regexDataValidadeCartao.test(novoCiclista.meioDePagamento.validade)) {
+      return reply.status(422).send('Formato inválido para a data de validade do cartão. Use o formato yyyy-MM.');
     }
   
     const resultadoVerificacaoSenha = await verificarConfirmacaoSenha(novoCiclista);
@@ -128,6 +138,10 @@ const ativarCadastroCiclista = async (request, reply) => {
 
     if (!ciclista) {
       return reply.status(404).send('Ciclista não encontrado');
+    }
+
+    if (ciclista.ativo === 'true') {
+      return reply.status(200).send('Ciclista já ativo.');
     }
 
     ciclista.ativo = true;
@@ -278,7 +292,7 @@ try {
   }
 
   const aluguel = {
-    dataHoraRetirada: new Date(),
+    dataHoraDevolucao: new Date(),
     numeroTranca,
     numeroBicicleta: bicicleta.numero,
     cartaoCobranca: ciclista.meioDePagamento.numero,

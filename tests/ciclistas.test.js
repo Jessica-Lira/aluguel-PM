@@ -3,9 +3,9 @@
 const { build } = require('../src/app');
 const {
   bodyCiclista, bodyCiclistaSemEmail, bodyCiclistaFormatoEmailErrado, bodyCiclistaInvalidPassaport,
-  bodyCiclistaEmailJaEmUso, bodyCartaoInvalido, bodyCiclistaSemCampoNASCIMENTO, bodyCiclistaSemCampoNOME,
-  bodyCiclistaSemCampoNACIONALIDADE, bodyCiclistaSemCampoSENHA, bodyCiclistaSemCampoCONFIRMARSENHA,
-  bodyCiclistaSemCampoMEIODEPAGAMENTOSemTudo, bodyCiclistaSemCampoMEIODEPAGAMENTOSemNome,
+  bodyCiclistaEmailJaEmUso, bodyCartaoInvalido, bodyCiclistaSemCampoNASCIMENTO, bodyCiclistaFormatoNASCIMENTOErrado,
+  bodyCiclistaSemCampoNOME, bodyCiclistaSemCampoNACIONALIDADE, bodyCiclistaSemCampoSENHA, bodyCiclistaSemCampoCONFIRMARSENHA,
+  bodyCiclistaSemCampoMEIODEPAGAMENTOSemTudo, bodyCiclistaSemCampoMEIODEPAGAMENTOSemNome, bodyCiclistaFormatoMEIODEPAGAMENTOErrado,
   bodyCiclistaSemCampoMEIODEPAGAMENTOSemNumero, bodyCiclistaSemCampoMEIODEPAGAMENTOSemValidade,
   bodyCiclistaSemCampoMEIODEPAGAMENTOSemCVV, bodyCiclistaUnmatchingPasswords, bodyCiclistaBrazilianWithCPF,
   bodyCiclistaNonBrazilianWithPassport,
@@ -89,6 +89,12 @@ describe('criarCiclista route test', () => {
     expect(response.statusCode).toBe(422);
   });
 
+  test('Should return 422 when invalid NASCIMENTO format', async () => {
+    const response = await callCriarCiclista(bodyCiclistaFormatoNASCIMENTOErrado);
+
+    expect(response.statusCode).toBe(422);
+  });
+
   test('Should return 422 when without NOME', async () => {
     const response = await callCriarCiclista(bodyCiclistaSemCampoNOME);
 
@@ -142,6 +148,12 @@ describe('criarCiclista route test', () => {
     const response = await callCriarCiclista(bodyCiclistaSemCampoMEIODEPAGAMENTOSemValidade);
 
     expect(response.body).toBe('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.')
+    expect(response.statusCode).toBe(422);
+  });
+
+  test('Should return 422 invalid format MEIODEPAGAMENTO - validade', async () => {
+    const response = await callCriarCiclista(bodyCiclistaFormatoMEIODEPAGAMENTOErrado); 
+
     expect(response.statusCode).toBe(422);
   });
 
@@ -423,7 +435,7 @@ describe('ativarCadastroCiclista route test', () => {
     expect(response.statusCode).toBe(200);
   });
 
-  test('Should do nothing if cyclist is active', async () => {
+  test('Should return success if cyclist is active', async () => {
     const app = build();
     const response = await app.inject({
       method: 'POST',
