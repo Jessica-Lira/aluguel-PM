@@ -9,12 +9,13 @@ const routesCiclista = async (fastify) => {
     fastify.get('/ciclistas/:id', ciclistasController.getCiclistaById);
     fastify.put('/ciclistas/:id', ciclistasController.atualizarCiclista);
     fastify.post('/ciclistas/:id/ativar', ciclistasController.ativarCadastroCiclista);
-    fastify.get('/ciclistas/:id/permite-aluguel', ciclistasController.permiteAluguel);
-    fastify.get('/ciclistas/cartao-credito/:id', ciclistasController.getCartaoCredito);
-    fastify.put('/ciclistas/atualizar-cartao/:id', ciclistasController.atualizarCartaoCredito);
-    fastify.get('/ciclistas/getExisteEmail/:email', ciclistasController.getExisteEmail);
-    fastify.get('/ciclistas/:id/bicicleta-alugada', ciclistasController.getBicicletaAlugada);
-    
+    fastify.get('/ciclistas/:id/permiteAluguel', ciclistasController.permiteAluguel);
+    fastify.get('/ciclistas/cartaoDeCredito/:id', ciclistasController.getCartaoCredito);
+    fastify.put('/ciclistas/cartaoDeCredito/:id', ciclistasController.atualizarCartaoCredito);
+    fastify.get('/ciclistas/existeEmail/:email', ciclistasController.getExisteEmail);
+    fastify.get('/ciclistas/:id/bicicletaAlugada', ciclistasController.getBicicletaAlugada);
+    fastify.post('/ciclistas/:id/aluguel', ciclistasController.postAluguel);
+    fastify.post('/ciclistas/:id/devolucao', ciclistasController.postDevolucao);
 }
 
 module.exports = routesCiclista;

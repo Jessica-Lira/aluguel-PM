@@ -19,6 +19,8 @@ Modelo:<br>
 Casos de Uso:
 
 - UC01 Cadastrar Ciclista
+- UC03 Alugar Bicileta
+- UC04 Devolver Bicicleta
 - UC06 Alterar Dados Ciclista
 - UC07 Alterar Cartão
 - UC15 Manter Cadastro de Funcionário
@@ -30,7 +32,7 @@ Endpoints:
     <li><input type="checkbox" checked>PUT /ciclista/{idCiclista}</li>
     <li><input type="checkbox" checked>POST /ciclista/{idCiclista}/ativar</li>
     <li><input type="checkbox" checked>GET /ciclista/{idCiclista}/permiteAluguel</li>
-    <li><input type="checkbox">GET /ciclista/{idCiclista}/bicicletaAlugada</li>
+    <li><input type="checkbox" checked>GET /ciclista/{idCiclista}/bicicletaAlugada</li>
     <li><input type="checkbox" checked>GET /ciclista/{idCiclista}</li>
     <li><input type="checkbox" checked>GET /ciclista/existeEmail/{email}</li>
     <li><input type="checkbox" checked>GET /funcionario</li>
@@ -40,13 +42,13 @@ Endpoints:
     <li><input type="checkbox" checked>DELETE /funcionario/{idFuncionario}</li>
     <li><input type="checkbox" checked>GET /cartaoDeCredito/{idCiclista}</li>
     <li><input type="checkbox" checked>PUT /cartaoDeCredito/{idCiclista}</li>
-    <li><input type="checkbox">POST /aluguel</li>
-    <li><input type="checkbox">POST /devolucao</li>
+    <li><input type="checkbox" checked>POST /aluguel</li>
+    <li><input type="checkbox" checked>POST /devolucao</li>
   </ul>
 
 A entrega deve ter:
 
-- Testes unitários em abundância (escopo de método), utilizando mocks;
+- Testes unitários, utilizando mocks;
 
 - A ferramenta Sonar configurada (no sonarcloud.io) com: 
 - (i) 0 Bug, 

@@ -97,28 +97,28 @@ const atualizarCiclista = async(request, reply) => {
       return reply.status(404).send('Ciclista não encontrado');
     }
 
-if ( (dadosAtualizados.nacionalidade === 'BR' && (!dadosAtualizados.cpf || dadosAtualizados.cpf.length !== 11)) || 
-    (!dadosAtualizados.passaporte?.numero || !dadosAtualizados.passaporte?.pais)) {
-  return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios corretamente.');
-}
-
-      if (dadosAtualizados.senha !== dadosAtualizados.confirmarSenha) {
-        return reply.status(422).send('Dados inválidos. A senha e a confirmação de senha devem ser iguais.');
-      }
-
-      const resultadoEnvioEmail = await enviarEmail(ciclista.email, 'Email enviado!');
-      if (!resultadoEnvioEmail.success) {
-        return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.message);
-      }
-
-      ciclistas[ciclistas.indexOf(ciclista)] = { ...ciclista, ...dadosAtualizados };
-
-      return reply.status(200).send('Dados atualizados' + JSON.stringify(ciclista));
-    } 
-   catch (error) {
-      console.error(error);
-      reply.status(422).send('Dados inválidos');
+    if ( (dadosAtualizados.nacionalidade === 'BR' && (!dadosAtualizados.cpf || dadosAtualizados.cpf.length !== 11)) || 
+        (!dadosAtualizados.passaporte?.numero || !dadosAtualizados.passaporte?.pais)) {
+      return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios corretamente.');
     }
+
+    if (dadosAtualizados.senha !== dadosAtualizados.confirmarSenha) {
+      return reply.status(422).send('Dados inválidos. A senha e a confirmação de senha devem ser iguais.');
+    }
+
+    const resultadoEnvioEmail = await enviarEmail(ciclista.email, 'OS dados da sua conta foram atualizados!' + JSON.stringify(ciclista));
+    if (!resultadoEnvioEmail.success) {
+      return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.message);
+    }
+
+    ciclistas[ciclistas.indexOf(ciclista)] = { ...ciclista, ...dadosAtualizados };
+
+    return reply.status(200).send('Dados atualizados' + JSON.stringify(ciclista));
+  } 
+  catch (error) {
+    console.error(error);
+    reply.status(422).send('Dados inválidos');
+  }
 };
 
 const ativarCadastroCiclista = async (request, reply) => {
@@ -184,7 +184,7 @@ try {
   }
 
   if (ciclista.statusAluguel === true) {
-    return reply.status(200).send("Biblicleta alugada");
+    return reply.status(200).send("Biblicleta alugada"); //retorna a bike?
   } else {
     return reply.status(200).send(null);
   }
@@ -194,27 +194,116 @@ try {
 
 }
 
-/// post aluguel
-//a tranca com o status “ocupada”, a bicicleta com o status “disponível”.
-//ciclista informa o número da tranca. 
-//valida a tranca (Número da tranca inválido. / tranca nao responde)
-//sistema le a bike na tranca (Não existe bicicleta na tranca.)
-//verifica ciclista pode pegar bicicleta: verifica alguel/ativo - envia email com dados do aluguel atual E msg / bike status “em reparo”).
-// cobranca 
-//confirma pagamento (Erro no pagamento ou pagamento não autorizado)
-//bike status em uso e tranca livre
-//Devem ser registrados: a data/hora da retirada, o número da tranca, o número da bicicleta, o cartão usado para cobrança e o ciclista que a pegou.
-// msg email para o ciclista informando os dados do aluguel da bicicleta -  incluindo horário, totem de bicicletas e o valor cobrado.
+const postAluguel = async (request, reply) => {
+  try {
+  const { id } = request.params; 
+  const ciclista = ciclistas.find(c => c.id === id);
+  const numeroTranca = "01";  // ???
 
-/// post devolucao
-//-tranca deve possuir o status “disponível”, a bicicleta deve possuir o status “em uso”.
-//valida o número da bicicleta.
-//calcula o valor a pagar
-//registra os dados da devolução da bicicleta - cobrança - Erro no pagamento ou pagamento não autorizado.
-//altera o status da bicicleta para “disponível”.
-//altera tranca alterando seu status para “ocupada”.
-//mensagem para o ciclista informando os dados da devolução da bicicleta
-//bicicleta devolvida - em reparo
+  const tranca = await verificarTranca(numeroTranca); // Verificar status da tranca
+  if (!tranca || tranca.status!== "ocupada") {
+    return reply.status(422).send('Número da tranca inválido');
+  } //falta o tranca nao responde
+
+  const bicicleta = await lerBicicleta(tranca); // Ver qual bicicleta está na tranca
+  if (!bicicleta) {
+    return reply.status(404).send('Não existe bicicleta na tranca');
+  }
+
+  // Verificar se o ciclista pode pegar a bicicleta
+  if (!ciclista) {
+    return reply.status(404).send('Ciclista não encontrado');
+  }
+
+  if (ciclista.statusAluguel === true) { // Enviar email com dados do aluguel em andamento
+    enviarEmail(ciclista.email, "Aluguel em andamento" + JSON.stringify(ciclista.aluguel)); 
+    return reply.status(422).send('Ciclista já possui um aluguel em andamento');
+  }
+  
+  if (ciclista.ativo === false) {
+    return reply.status(422).send({
+      codigo: '422', mensagem: 'Ciclista inativo. Ative sua conta.'
+    });
+  }
+
+  if (bicicleta.status === 'em reparo') {
+    return reply.status(404).send('Bicicleta em reparo');
+  }
+
+  const confirmacaoPagamento = await verificarPagamento(pagamento);
+  if (!confirmacaoPagamento) { //falta o erro no pagamento
+    return reply.status(404).send('Pagamento não autorizado');
+  }
+
+  bicicleta.status = 'em uso';
+  tranca.status = 'livre';
+
+  //cobranca
+  const aluguel = {
+    dataHoraRetirada: new Date(),
+    numeroTranca,
+    numeroBicicleta: bicicleta.numero,
+    cartaoCobranca: ciclista.meioDePagamento.numero,
+    ciclista: ciclista.nome,
+    valorCobrado, // ???
+  };
+
+  enviarEmail(ciclista.email, "Aluguel solicitado" + JSON.stringify(aluguel));
+
+  return reply.status(200).send('Aluguel realizado com sucesso' + JSON.stringify(aluguel));
+} catch (error) {
+  console.error(error);
+  reply.status(500).send('Erro interno do servidor');
+}
+};
+
+const postDevolucao = async (request, reply) => {
+try {
+  const { id } = request.params; 
+  const ciclista = ciclistas.find(c => c.id === id);
+  const numeroTranca = "01";  // ???
+  const numeroBicicleta = "01";
+
+  if (!ciclista.statusAluguel) {
+    return reply.status(400).send('O ciclista não possui uma bicicleta alugada');
+  }
+
+  const tranca = await verificarTranca(numeroTranca); // Verificar status da tranca
+  if (!tranca || tranca.status !== "disponivel") {
+    return reply.status(422).send('Número da tranca inválido');
+  } //falta o tranca nao responde
+
+  if (!numeroBicicleta || numeroBicicleta.status !== 'em uso') {
+    return reply.status(404).send('Número da bicicleta inválido');
+  }
+
+  //valorTotalAPagar();
+
+  const aluguel = {
+    dataHoraRetirada: new Date(),
+    numeroTranca,
+    numeroBicicleta: bicicleta.numero,
+    cartaoCobranca: ciclista.meioDePagamento.numero,
+    ciclista: ciclista.nome,
+    valorCobrado: "valorTotalAPAgar",
+  };
+
+  const confirmacaoPagamento = await verificarPagamento(pagamento);
+  if (!confirmacaoPagamento) { //falta o erro no pagamento
+    return reply.status(404).send('Pagamento não autorizado');
+  }
+
+  bicicleta.status = 'disponivel';
+  tranca.status = 'ocupada';
+
+  enviarEmail(ciclista.email, "Aluguel" + JSON.stringify(aluguel));
+
+  return reply.status(200).send('Bicicleta devolvida com sucesso');
+} catch (error) {
+  console.error(error);
+  reply.status(422).send('Dados inválidos');
+}
+};
 
 /* ********                EMAIL                   ********    */
 const getExisteEmail = async (request, reply) => {
@@ -243,14 +332,14 @@ const getExisteEmail = async (request, reply) => {
       return reply.status(200).send({
         success: true,
         status: 200,
-        message: 'E-mail já está em uso por outro ciclista. Escolha um e-mail diferente.',
+        //message: 'E-mail já está em uso por outro ciclista. Escolha um e-mail diferente.',
         emailExists: true,
       });
     } else {
       return reply.status(200).send({
         success: true,
         status: 200,
-        message: 'E-mail disponível.',
+        //message: 'E-mail disponível.',
         emailExists: false,
       });
     }
@@ -437,12 +526,35 @@ const verificarCamposObrigatorios = (objeto, campos) => {
 };
 
 const enviarEmail = async (email, mensagem) => {
-
     // Envio de e-mail vi API
-    return { success: true, status: 200, message: 'E-mail enviado com sucesso.'};
-
+    return { 
+      success: true, status: 200, message: 'E-mail enviado com sucesso.'
+    };
 };
 
+//METODOS AUX DO POST ALUGUEL
+const verificarTranca = async (numeroTranca) => {
+  // Simular de verificacao da tranca - outro microsserviço
+  if (!tranca) { return {success: false, status: 404, message: ''}  }
+  return { success: true, status: 200 };
+};
+
+const lerBicicleta = async (tranca) => {
+  // Simulacao de leitura da bicicleta na tranca - outro microsserviço
+
+  //const bicicleta = bicicleta.lerBicicleta(tranca); - como simulamos isso?
+
+  if (!bicicleta) { return {success: false, status: 404, message: ''}  }
+  return { success: true, status: 200 };
+};
+
+const verificarPagamento = async (meioDePagamento, bicicleta) => {
+  // Simulacao da cobrança
+  //const pagamento = pagamento.realizarCobranca(meioDePagamento, bicicleta);
+
+  if (!pagamento) { return {success: false, status: 404, message: ''}  }
+  return { success: true, status: 200 };
+};
 
 module.exports = {
   getCiclistas,
@@ -454,5 +566,7 @@ module.exports = {
   getCartaoCredito,
   atualizarCartaoCredito,
   getExisteEmail,
-  getBicicletaAlugada
+  getBicicletaAlugada,
+  postAluguel,
+  postDevolucao
 }
