@@ -201,7 +201,7 @@ const postAluguel = async (request, reply) => {
   const numeroTranca = "01";  // ???
 
   const tranca = await verificarTranca(numeroTranca); // Verificar status da tranca
-  if (!tranca || tranca.status!== "ocupada") {
+  if (!tranca || tranca.status != "ocupada") {
     return reply.status(422).send('Número da tranca inválido');
   } //falta o tranca nao responde
 
@@ -226,7 +226,7 @@ const postAluguel = async (request, reply) => {
     });
   }
 
-  if (bicicleta.status === 'em reparo') {
+  if (bicicleta.status == 'em reparo') {
     return reply.status(404).send('Bicicleta em reparo');
   }
 
@@ -269,23 +269,21 @@ try {
   }
 
   const tranca = await verificarTranca(numeroTranca); // Verificar status da tranca
-  if (!tranca || tranca.status !== "disponivel") {
+  if (!tranca || tranca.status != "disponivel") {
     return reply.status(422).send('Número da tranca inválido');
   } //falta o tranca nao responde
 
-  if (!numeroBicicleta || numeroBicicleta.status !== 'em uso') {
+  if (!numeroBicicleta || numeroBicicleta.status != 'em uso') {
     return reply.status(404).send('Número da bicicleta inválido');
   }
-
-  //valorTotalAPagar();
 
   const aluguel = {
     dataHoraRetirada: new Date(),
     numeroTranca,
     numeroBicicleta: bicicleta.numero,
     cartaoCobranca: ciclista.meioDePagamento.numero,
-    ciclista: ciclista.nome,
-    valorCobrado: "valorTotalAPAgar",
+    ciclista: ciclista.nome, 
+    valorCobrado: "valorTotalAPAgar",   // falta calcular o valor a pagar
   };
 
   const confirmacaoPagamento = await verificarPagamento(pagamento);
