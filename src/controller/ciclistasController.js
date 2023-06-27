@@ -471,10 +471,9 @@ const getDadosCiclista = (ciclista) => {
   };
 };
 
-//MUDAR PRA BRASILEIRO OU ESTRANGEIRO
 const verificarNacionalidade = async (novoCiclista) => {
   const { nacionalidade } = novoCiclista;
-if (nacionalidade?.toUpperCase() === 'BR') {
+if (nacionalidade?.toUpperCase() === 'BR') { //MUDAR PRA BRASILEIRO OU ESTRANGEIRO
   if (novoCiclista.cpf === '' || novoCiclista.cpf.length !== 11) {
     return {
       success: false,
