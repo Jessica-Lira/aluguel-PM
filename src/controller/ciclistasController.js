@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const { ciclistas } = require('../dataCiclistas.js');
+const validacoes = require('../services/validacoesCiclista.js')
 
 const getCiclistas = async (request, reply) => { //metodo aux , nao tem cdu
   try {
