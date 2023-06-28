@@ -6,7 +6,6 @@ const build = (opts = {}) => {
 
     app.register(require('./routes/helloWorldRoute'));
     app.register(require('./routes/ciclistasRoute'));
-    //Pq essa linha quebra a aplicação?
     app.register(require('./routes/funcionariosRoute'));
 
     return app;

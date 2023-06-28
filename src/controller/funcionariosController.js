@@ -2,8 +2,12 @@ const { v4: uuidv4 } = require('uuid');
 const { v1: uuidv1 } = require('uuid');
 const { funcionarios } = require('../data.js');
 
+var teste  = require('../metodos/teste.js')
+const validacoes = require('../metodos/validacoes.js')
+
 const getFuncionarios = async (request, reply) => {
     try {
+      teste()
       return reply.status(200).send(funcionarios)
     } catch (error) {
       console.error(error)
@@ -21,20 +25,23 @@ const criarFuncionario = async (request, reply) => {
 
       //Verificando campos obrigatórios
       const camposObrigatorios = ['email', 'nome', 'senha', 'confirmacaoSenha'];
-      const resultadoVerificacaoCamposObrigatorios = await verificarCamposObrigatorios(novoFuncionario, camposObrigatorios);
+      const resultadoVerificacaoCamposObrigatorios = await validacoes.validarCamposObrigatorios(novoFuncionario, camposObrigatorios);
+      console.log("Campos Obrigatorios Resultado Verificacao: "+resultadoVerificacaoCamposObrigatorios.success)
       if (!resultadoVerificacaoCamposObrigatorios.success) {
         return reply.status(resultadoVerificacaoCamposObrigatorios.status).send(resultadoVerificacaoCamposObrigatorios);
       }
   
       //Verificando Email
-      const resultadoVerificacaoEmail = await verificarEmail(novoFuncionario.email);
+      const resultadoVerificacaoEmail = await validacoes.validarEmail(novoFuncionario.email);
+      console.log("Email Resultado Verificacao: "+resultadoVerificacaoEmail.success)
       if (!resultadoVerificacaoEmail.success) {
         //console.log("Verificando Email na criação de Funcionario")
         return reply.status(resultadoVerificacaoEmail.status).send(resultadoVerificacaoEmail);
       }
 
       //Verificando campos de senha
-      const resultadoVerificacaoSenha = await verificarConfirmacaoSenha(novoFuncionario);
+      const resultadoVerificacaoSenha = await validacoes.validarSenha(novoFuncionario);
+      console.log("Senha Resultado Verificacao: "+resultadoVerificacaoSenha.success)
       if (!resultadoVerificacaoSenha.success) {
         return reply.status(resultadoVerificacaoSenha.status).send(resultadoVerificacaoSenha);
       }
@@ -48,8 +55,8 @@ const criarFuncionario = async (request, reply) => {
   
       return reply.send(novoFuncionario)
     } catch (error) {
-      //console.error(error)
-      reply.status(500).send('Erro ao criar funcionario')
+      console.error(error)
+      reply.status(500).send('TESTE Erro ao criar funcionario')
     }
   }
 
@@ -100,19 +107,22 @@ const atualizarFuncionario = async (request, reply) => {
 
       //Verificando campos obrigatórios
       const camposObrigatorios = ['senha', 'confirmacaoSenha','nome','email'];
-      const resultadoVerificacaoCamposObrigatorios = await verificarCamposObrigatorios(dadosAtualizados, camposObrigatorios);
+      const resultadoVerificacaoCamposObrigatorios = await validacoes.validarCamposObrigatorios(dadosAtualizados, camposObrigatorios);
+      console.log("Resultado Verificacao Campos Obrigatorios: "+resultadoVerificacaoCamposObrigatorios.success)
       if (!resultadoVerificacaoCamposObrigatorios.success) {
         return reply.status(resultadoVerificacaoCamposObrigatorios.status).send(resultadoVerificacaoCamposObrigatorios);
       } 
 
       //Verificando Email
-      const resultadoVerificacaoEmail = await verificarEmail(dadosAtualizados.email);
+      const resultadoVerificacaoEmail = await validacoes.validarEmail(dadosAtualizados.email);
+      console.log("Resultado Verificacao Email: "+resultadoVerificacaoEmail.success)
       if (!resultadoVerificacaoEmail.success) {
         return reply.status(resultadoVerificacaoEmail.status).send(resultadoVerificacaoEmail);
       }
          
       //Verificando campos de senha
-      const resultadoVerificacaoSenha = await verificarConfirmacaoSenha(dadosAtualizados);
+      const resultadoVerificacaoSenha = await validacoes.validarSenha(dadosAtualizados);
+      console.log("Resultado Verificacao Senha: "+resultadoVerificacaoSenha.success)
       if (!resultadoVerificacaoSenha.success) {
         return reply.status(resultadoVerificacaoSenha.status).send(resultadoVerificacaoSenha);
       }
@@ -178,71 +188,6 @@ const validarID = async (id) => {
     return {success: true};
   };
 }
-
-/*************** EMAIL ***************/
-
-const verificarEmail = async (email) => {
-  
-  const EmailValido = validarFormatoEmail(email);
-  
-  if (!EmailValido) {
-    //console.log("validando formato Email")
-    return {
-      success: false,
-      status: 422,
-      mensagem: 'Dados inválidos. Formato de e-mail inválido',
-    };
-  }
-
-  const emailEmUso = funcionarios.find((f) => f.email === email);
-  if (emailEmUso) {
-    //console.log("Verificando se Email esta em uso")
-    return {
-      success: false,
-      status: 422,
-      mensagem: 'Dados inválidos. E-mail já está em uso por outro funcionário. Escolha um e-mail diferente.'
-    };
-  } else {
-      return {success: true};
-  }
-};
-
-const validarFormatoEmail = (email) => {
-  //console.log("Email Regex")
-  const emailRegex = /^\S+@\S+\.\S+$/;
-  return emailRegex.test(email);
-};
-
-/*************** CAMPOS OBRIGATORIOS ***************/
-
-const verificarCamposObrigatorios = (objeto, campos) => {
-  //console.log("Verificando campos obrigatórios")
-  for (const campo of campos) {
-    if (!objeto[campo]) {
-      return {
-        success: false,
-        status: 422,
-        mensagem: 'Dados inválidos. Insira todos os campos obrigatórios.'
-      };
-    }
-  }
-  return {success: true};
-};
-
-/*************** SENHA E CONFIRMAÇÃO SENHA ***************/
-
-const verificarConfirmacaoSenha = (novoFuncionario) => {
-  const { senha, confirmacaoSenha } = novoFuncionario;
-
-  if (senha !== confirmacaoSenha) {
-    return {
-      success: false,
-      status: 422,
-      mensagem: 'Dados inválidos. A senha e a confirmação de senha devem ser iguais.',
-    };
-  }
-  return { success: true };
-};
 
 /*************** BUSCA DE DADOS DE FUNCIONARIOS ***************/
 
