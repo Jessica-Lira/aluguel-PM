@@ -1,13 +1,10 @@
 const { v4: uuidv4 } = require('uuid');
 const { v1: uuidv1 } = require('uuid');
-const { funcionarios } = require('../data.js');
-
-var teste  = require('../metodos/teste.js')
-const validacoes = require('../metodos/validacoes.js')
+const { funcionarios } = require('../dataFuncionarios.js');
+const validacoes = require('../services/validacoesFuncionario.js')
 
 const getFuncionarios = async (request, reply) => {
     try {
-      teste()
       return reply.status(200).send(funcionarios)
     } catch (error) {
       console.error(error)
@@ -26,22 +23,22 @@ const criarFuncionario = async (request, reply) => {
       //Verificando campos obrigatórios
       const camposObrigatorios = ['email', 'nome', 'senha', 'confirmacaoSenha'];
       const resultadoVerificacaoCamposObrigatorios = await validacoes.validarCamposObrigatorios(novoFuncionario, camposObrigatorios);
-      console.log("Campos Obrigatorios Resultado Verificacao: "+resultadoVerificacaoCamposObrigatorios.success)
+      //console.log("Campos Obrigatorios Resultado Verificacao: "+resultadoVerificacaoCamposObrigatorios.success)
       if (!resultadoVerificacaoCamposObrigatorios.success) {
         return reply.status(resultadoVerificacaoCamposObrigatorios.status).send(resultadoVerificacaoCamposObrigatorios);
       }
   
       //Verificando Email
       const resultadoVerificacaoEmail = await validacoes.validarEmail(novoFuncionario.email);
-      console.log("Email Resultado Verificacao: "+resultadoVerificacaoEmail.success)
+      //console.log("Email Resultado Verificacao: "+resultadoVerificacaoEmail.success)
       if (!resultadoVerificacaoEmail.success) {
         //console.log("Verificando Email na criação de Funcionario")
         return reply.status(resultadoVerificacaoEmail.status).send(resultadoVerificacaoEmail);
       }
 
       //Verificando campos de senha
-      const resultadoVerificacaoSenha = await validacoes.validarSenha(novoFuncionario);
-      console.log("Senha Resultado Verificacao: "+resultadoVerificacaoSenha.success)
+      const resultadoVerificacaoSenha = await validacoes.validarSenha(novoFuncionario.senha, novoFuncionario.confirmacaoSenha);
+      //console.log("Senha Resultado Verificacao: "+resultadoVerificacaoSenha.success)
       if (!resultadoVerificacaoSenha.success) {
         return reply.status(resultadoVerificacaoSenha.status).send(resultadoVerificacaoSenha);
       }
@@ -64,7 +61,7 @@ const getFuncionarioById = async (request, reply) => {
     try {
         const id = request.params.id
 
-        const resultadoVerificacaoID = await validarID(id);
+        const resultadoVerificacaoID = await validacoes.validarID(id);
         if (!resultadoVerificacaoID.success) {
           //console.log("Verificando ID valido no GET")
           return reply.status(resultadoVerificacaoID.status).send(resultadoVerificacaoID);
@@ -92,7 +89,7 @@ const atualizarFuncionario = async (request, reply) => {
       const funcionario = funcionarios.find(f => f.id === id)
 
       //Verificando ID
-      const resultadoVerificacaoID = await validarID(id);
+      const resultadoVerificacaoID = await validacoes.validarID(id);
       if (!resultadoVerificacaoID.success) {
         //console.log("Verificando ID valido no GET: "+validarID(id))
         return reply.status(resultadoVerificacaoID.status).send(resultadoVerificacaoID);
@@ -108,21 +105,21 @@ const atualizarFuncionario = async (request, reply) => {
       //Verificando campos obrigatórios
       const camposObrigatorios = ['senha', 'confirmacaoSenha','nome','email'];
       const resultadoVerificacaoCamposObrigatorios = await validacoes.validarCamposObrigatorios(dadosAtualizados, camposObrigatorios);
-      console.log("Resultado Verificacao Campos Obrigatorios: "+resultadoVerificacaoCamposObrigatorios.success)
+      //console.log("Resultado Verificacao Campos Obrigatorios: "+resultadoVerificacaoCamposObrigatorios.success)
       if (!resultadoVerificacaoCamposObrigatorios.success) {
         return reply.status(resultadoVerificacaoCamposObrigatorios.status).send(resultadoVerificacaoCamposObrigatorios);
       } 
 
       //Verificando Email
       const resultadoVerificacaoEmail = await validacoes.validarEmail(dadosAtualizados.email);
-      console.log("Resultado Verificacao Email: "+resultadoVerificacaoEmail.success)
+      //console.log("Resultado Verificacao Email: "+resultadoVerificacaoEmail.success)
       if (!resultadoVerificacaoEmail.success) {
         return reply.status(resultadoVerificacaoEmail.status).send(resultadoVerificacaoEmail);
       }
          
       //Verificando campos de senha
-      const resultadoVerificacaoSenha = await validacoes.validarSenha(dadosAtualizados);
-      console.log("Resultado Verificacao Senha: "+resultadoVerificacaoSenha.success)
+      const resultadoVerificacaoSenha = await validacoes.validarSenha(dadosAtualizados.senha, dadosAtualizados.confirmacaoSenha);
+      //console.log("Resultado Verificacao Senha: "+resultadoVerificacaoSenha.success)
       if (!resultadoVerificacaoSenha.success) {
         return reply.status(resultadoVerificacaoSenha.status).send(resultadoVerificacaoSenha);
       }
@@ -147,7 +144,7 @@ const atualizarFuncionario = async (request, reply) => {
     const funcionario = funcionarios.find(c => c.id === id)
     
     //Verificando campos ID
-    const resultadoVerificacaoID = await validarID(id);
+    const resultadoVerificacaoID = await validacoes.validarID(id);
     if (!resultadoVerificacaoID.success) {
       return reply.status(resultadoVerificacaoID.status).send(resultadoVerificacaoID);
     } 
@@ -175,23 +172,9 @@ const atualizarFuncionario = async (request, reply) => {
     }
 }
 
-/************ VALIDAR ID *************/
-
-const validarID = async (id) => {
-  if (id.length!=36) { 
-    return ({
-    success: false,
-    status: 422,
-    mensagem: 'Dados inválidos. ID invalido.',
-    });
-  } else {
-    return {success: true};
-  };
-}
-
 /*************** BUSCA DE DADOS DE FUNCIONARIOS ***************/
 
-const getDadosFuncionario = (funcionario) => {
+function getDadosFuncionario(funcionario){
   return {
     matricula: funcionario.matricula,
     senha: funcionario.senha,
@@ -203,6 +186,8 @@ const getDadosFuncionario = (funcionario) => {
     cpf: funcionario.cpf
   };
 };
+
+/*************** MODULOS EXPORTADOS ***************/
 
 module.exports = {
     getFuncionarios,

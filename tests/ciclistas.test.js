@@ -502,7 +502,7 @@ describe('getCartaoCredito route test', () => {
     const app = build();
     const response = await app.inject({
       method: 'GET',
-      url: '/ciclistas/cartaoDeCredito/1',
+      url: '/cartaoDeCredito/1',
     });
     expect(response.statusCode).toBe(200);
   });
@@ -512,7 +512,7 @@ describe('getCartaoCredito route test', () => {
 
     const response = await app.inject({
       method: 'GET',
-      url: '/ciclistas/cartaoDeCredito/20',
+      url: '/cartaoDeCredito/20',
     });
 
     expect(response.statusCode).toBe(404);

@@ -1,8 +1,6 @@
-const { funcionarios } = require('../data.js');
+const { funcionarios } = require('../dataFuncionarios.js');
 
-function validarSenha(funcionario){
-const { senha, confirmacaoSenha } = funcionario;
-
+function validarSenha(senha,confirmacaoSenha){
 if (senha !== confirmacaoSenha) {
     return {
     success: false,
@@ -29,7 +27,7 @@ function validarCamposObrigatorios(objeto, campos) {
 function validarEmail(email){
   
     const EmailValido = validarFormatoEmail(email);
-    console.log("Email formato valido: "+EmailValido)
+    //console.log("Email formato valido: "+EmailValido)
     
     if (!EmailValido) {
       return {
@@ -41,7 +39,7 @@ function validarEmail(email){
   
     const emailEmUso = funcionarios.find((f) => f.email === email);
     if (emailEmUso) {
-      console.log("Email esta em uso")
+      //console.log("Email esta em uso")
       return {
         success: false,
         status: 422,
@@ -57,9 +55,22 @@ function validarFormatoEmail(email) {
     return emailRegex.test(email);
 };
 
+const validarID = async (id) => {
+    if (id.length!=36) { 
+      return ({
+      success: false,
+      status: 422,
+      mensagem: 'Dados inválidos. ID invalido.',
+      });
+    } else {
+      return {success: true};
+    };
+  }
+
 module.exports = {
     validarSenha,
     validarCamposObrigatorios,
     validarEmail,
-    validarFormatoEmail
+    validarFormatoEmail,
+    validarID
 };
