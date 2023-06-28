@@ -60,7 +60,7 @@ const criarCiclista = async (request, reply) => {
       return reply.status(resultadoVerificacaoNacionalidade.status).send(resultadoVerificacaoNacionalidade.message);
     }
   
-    const resultadoValidacaoCartao = await validacoes.validarCartaoCredito(novoCiclista.meioDePagamento);
+    const resultadoValidacaoCartao = validacoes.validarCartaoCredito(novoCiclista.meioDePagamento);
     if (!resultadoValidacaoCartao.success) {
       return reply.status(resultadoValidacaoCartao.status).send(resultadoValidacaoCartao.message);
     }
