@@ -44,7 +44,7 @@ const criarCiclista = async (request, reply) => {
       return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.');
     }
 
-    const regexDataValidadeCartao = /^\d{4}-\d{2}$/; // Verificar formato da data de validade do cartão (yyyy-MM)
+    const regexDataValidadeCartao = /^\d{4}-\d{2}$/; 
     if (!regexDataValidadeCartao.test(novoCiclista.meioDePagamento.validade)) {
       return reply.status(422).send('Formato inválido para a data de validade do cartão. Use o formato yyyy-MM.');
     }
@@ -193,13 +193,21 @@ const getBicicletaAlugada = async (request, reply) => {
 try {
   const { id } = request.params;
   const ciclista = ciclistas.find(c => c.id === id);
+  const bicicleta = {
+    "id": 0,
+    "marca": "string",
+    "modelo": "string",
+    "ano": "string",
+    "numero": 0,
+    "status": "string"
+  };
 
   if (!ciclista) {
     return reply.status(404).send('Ciclista não encontrado');
   }
 
   if (ciclista.statusAluguel === true) {
-    return reply.status(200).send("Biblicleta alugada"); //retorna a bike?
+    return reply.status(200).send("Biblicleta alugada" + JSON.stringify(bicicleta)); 
   } else {
     return reply.status(200).send(null);
   }
@@ -216,7 +224,7 @@ const postAluguel = async (request, reply) => {
   const tranca = { numeroTranca: "01", status: "ocupada" };
   const bicicleta = { numeroBicicleta: "01", status: "disponivel" };
   const pagamento = true;
-  const dataHoraRetirada = moment().format('YYYY-MM-DD HH:mm:ss');
+  const dataHoraRetirada = "";
 
   if (!tranca || tranca.status != "ocupada") {
     return reply.status(422).send('Número da tranca inválido');
@@ -250,15 +258,12 @@ const postAluguel = async (request, reply) => {
     return reply.status(404).send('Pagamento não autorizado');
   }
 
-  bicicleta.status = 'em uso';
-  tranca.status = 'livre';
-
   //cobranca
   const aluguel = {
-    dataHoraRetirada: new Date(),
+    dataHoraRetirada: moment().format('YYYY-MM-DD HH:mm:ss'),
     dataHoraDevolucao: "",
     numeroTranca: tranca.numeroTranca,
-    numeroBicicleta: bicicleta.numeroBicileta,
+    numeroBicicleta: bicicleta.numeroBicicleta,
     cartaoCobranca: ciclista.meioDePagamento.numero,
     ciclista: ciclista.nome, 
     valorAluguel: "",
@@ -266,6 +271,9 @@ const postAluguel = async (request, reply) => {
 
   enviarEmail(ciclista.email, "Aluguel solicitado" + JSON.stringify(aluguel));
 
+  bicicleta.status = 'em uso';
+  tranca.status = 'livre';
+  
   return reply.status(200).send('Aluguel realizado com sucesso' + JSON.stringify(aluguel));
 } catch (error) {
   console.error(error);
