@@ -12,6 +12,9 @@ const {
 } = require("./ciclistaMock");
 const app = build();
 
+const axios = require('axios');
+jest.mock('axios');
+
 const callCriarCiclista = async (body) => {
   return await app.inject({
     method: 'POST',
@@ -20,12 +23,16 @@ const callCriarCiclista = async (body) => {
   })
 };
 
+const callGetCiclistas = async () => {
+  return await app.inject({
+    method: 'GET',
+    url: '/ciclistas'
+  })
+}
+
 describe('getCiclistas route test', () => {
   test('Should return the list of cyclists when called', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/ciclistas'
-    });
+    const response = await callGetCiclistas();
 
     expect(response.statusCode).toBe(200);
   });
@@ -38,12 +45,12 @@ describe('getCiclistas route test', () => {
 
     expect(response.statusCode).toBe(404);
   });
+
 });
 
 describe('criarCiclista route test', () => {
   test('Should create a new cyclist when all data is provided', async () => {
     const response = await callCriarCiclista(bodyCiclista);
-
     expect(response.statusCode).toBe(201);
   });
 

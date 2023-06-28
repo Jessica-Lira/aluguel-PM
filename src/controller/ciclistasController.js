@@ -1,6 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
-const { ciclistas } = require('../dataCiclistas.js');
-const validacoes = require('../services/validacoesCiclista.js')
+const { ciclistas } = require('../data.js');
 
 const getCiclistas = async (request, reply) => { //metodo aux , nao tem cdu
   try {
@@ -45,7 +44,7 @@ const criarCiclista = async (request, reply) => {
       return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.');
     }
 
-    const regexDataValidadeCartao = /^\d{4}-\d{2}$/; // Verificar formato da data de validade do cartão (yyyy-MM)
+    const regexDataValidadeCartao = /^\d{4}-\d{2}$/; 
     if (!regexDataValidadeCartao.test(novoCiclista.meioDePagamento.validade)) {
       return reply.status(422).send('Formato inválido para a data de validade do cartão. Use o formato yyyy-MM.');
     }
@@ -194,13 +193,21 @@ const getBicicletaAlugada = async (request, reply) => {
 try {
   const { id } = request.params;
   const ciclista = ciclistas.find(c => c.id === id);
+  const bicicleta = {
+    "id": 0,
+    "marca": "string",
+    "modelo": "string",
+    "ano": "string",
+    "numero": 0,
+    "status": "string"
+  };
 
   if (!ciclista) {
     return reply.status(404).send('Ciclista não encontrado');
   }
 
   if (ciclista.statusAluguel === true) {
-    return reply.status(200).send("Biblicleta alugada"); //retorna a bike?
+    return reply.status(200).send("Biblicleta alugada" + JSON.stringify(bicicleta)); 
   } else {
     return reply.status(200).send(null);
   }
@@ -214,10 +221,7 @@ const postAluguel = async (request, reply) => {
   try {
   const { id } = request.params; 
   const ciclista = ciclistas.find(c => c.id === id);
-  const tranca = { numeroTranca: "01", status: "ocupada" };
-  const bicicleta = { numeroBicicleta: "01", status: "disponivel" };
-  const pagamento = true;
-  const dataHoraRetirada = moment().format('YYYY-MM-DD HH:mm:ss');
+  const numeroTranca = "01";  // ???
 
   if (!tranca || tranca.status != "ocupada") {
     return reply.status(422).send('Número da tranca inválido');
@@ -251,22 +255,20 @@ const postAluguel = async (request, reply) => {
     return reply.status(404).send('Pagamento não autorizado');
   }
 
-  bicicleta.status = 'em uso';
-  tranca.status = 'livre';
-
   //cobranca
   const aluguel = {
     dataHoraRetirada: new Date(),
-    dataHoraDevolucao: "",
-    numeroTranca: tranca.numeroTranca,
-    numeroBicicleta: bicicleta.numeroBicileta,
+    numeroTranca,
+    numeroBicicleta: bicicleta.numero,
     cartaoCobranca: ciclista.meioDePagamento.numero,
     ciclista: ciclista.nome, 
     valorAluguel: "",
   };
 
   enviarEmail(ciclista.email, "Aluguel solicitado" + JSON.stringify(aluguel));
-
+  bicicleta.status = 'em uso';
+  tranca.status = 'livre';
+  
   return reply.status(200).send('Aluguel realizado com sucesso' + JSON.stringify(aluguel));
 } catch (error) {
   console.error(error);
@@ -278,30 +280,35 @@ const postDevolucao = async (request, reply) => {
 try {
   const { id } = request.params; 
   const ciclista = ciclistas.find(c => c.id === id);
-  const numeroTranca = "01";  // ???
-  const numeroBicicleta = "01";
+  const tranca = { numeroTranca: "01", status: "disponivel" };
+  const bicicleta = { numeroBicicleta: "01", status: "em uso" };
+  const dataHoraDevolucao = moment().format('YYYY-MM-DD HH:mm:ss');
 
   if (!ciclista.statusAluguel) {
     return reply.status(400).send('O ciclista não possui uma bicicleta alugada');
   }
 
-  const tranca = await verificarTranca(numeroTranca); // Verificar status da tranca
-  if (!tranca || tranca.status != "disponivel") {
+  if (tranca === undefined || tranca.status != "disponivel") {
     return reply.status(422).send('Número da tranca inválido');
   } //falta o tranca nao responde
 
-  if (!numeroBicicleta || numeroBicicleta.status != 'em uso') {
+  if (bicicleta === undefined || bicicleta.status != 'em uso') {
     return reply.status(404).send('Número da bicicleta inválido');
   }
 
+  const valorAluguel = calcularValorAluguel("27/06/2023", "10:00", "27/06/2023", "13:30");
+  console.log(`Valor do aluguel: R$ ${valorAluguel}`);
+
   const aluguel = {
+    dataHoraRetirada: dataHoraRetirada,
     dataHoraDevolucao: new Date(),
-    numeroTranca,
-    numeroBicicleta: bicicleta.numero,
+    numeroTranca: tranca.numeroTranca,
+    numeroBicicleta: bicicleta.numeroBicicleta,
     cartaoCobranca: ciclista.meioDePagamento.numero,
     ciclista: ciclista.nome, 
-    valorCobrado: "valorTotalAPAgar",   // falta calcular o valor a pagar
+    valorAluguel: valorAluguel,
   };
+  console.log( 'aluguel' + aluguel)
 
   const confirmacaoPagamento = await verificarPagamento(pagamento);
   if (!confirmacaoPagamento) { //falta o erro no pagamento
@@ -441,34 +448,46 @@ const getDadosCiclista = (ciclista) => {
 
 const enviarEmail = async (email, mensagem) => {
     // Envio de e-mail vi API
+
     return { 
       success: true, status: 200, message: 'E-mail enviado com sucesso.'
     };
 };
 
 //METODOS AUX DO POST ALUGUEL
-const verificarTranca = async (numeroTranca) => {
-  // Simular de verificacao da tranca - outro microsserviço
-  if (!tranca) { return {success: false, status: 404, message: ''}  }
-  return { success: true, status: 200 };
-};
-
-const lerBicicleta = async (tranca) => {
-  // Simulacao de leitura da bicicleta na tranca - outro microsserviço
-
-  //const bicicleta = bicicleta.lerBicicleta(tranca); - como simulamos isso?
-
-  if (!bicicleta) { return {success: false, status: 404, message: ''}  }
-  return { success: true, status: 200 };
-};
 
 const verificarPagamento = async (meioDePagamento, bicicleta) => {
   // Simulacao da cobrança
   //const pagamento = pagamento.realizarCobranca(meioDePagamento, bicicleta);
 
+  const pagamento = true;
+
   if (!pagamento) { return {success: false, status: 404, message: ''}  }
   return { success: true, status: 200 };
 };
+
+const calcularValorAluguel = async(dataInicio, horaInicio, dataFim, horaFim) => {
+  const formatoDataHora = "DD/MM/YYYY HH:mm";
+  const dataHoraInicio = moment(dataInicio + " " + horaInicio, formatoDataHora);
+  const dataHoraFim = moment(dataFim + " " + horaFim, formatoDataHora);
+
+  const duracaoAluguel = moment.duration(dataHoraFim.diff(dataHoraInicio));
+  const horasIniciais = moment.duration(2, 'hours');
+  const meiaHoraExcedente = moment.duration(30, 'minutes');
+  let valorTotal = 0;
+
+  if (duracaoAluguel <= horasIniciais) {
+    valorTotal = 0;
+  } else {
+    const duracaoExcedente = duracaoAluguel.subtract(horasIniciais);
+    valorTotal = 10.0;
+    while (duracaoExcedente > meiaHoraExcedente) {
+      valorTotal += 5.0;
+      duracaoExcedente.subtract(meiaHoraExcedente);
+    }
+  }
+  return valorTotal.toFixed(2);
+}
 
 module.exports = {
   getCiclistas,
