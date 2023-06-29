@@ -117,6 +117,13 @@ function validarMeioDePagamento(nome,cvv,numero,validade){
    return true
 } 
 
+function validarDataValidadeCartao(dataValidadeCartao){
+  const regexDataValidadeCartao = /^\d{4}-\d{2}$/; 
+  if (!regexDataValidadeCartao.test(dataValidadeCartao)) {
+    return false
+  } 
+  return true
+}
 
 module.exports = {
     verificarCamposObrigatorios,
@@ -127,5 +134,6 @@ module.exports = {
     validarCartaoCredito,
     verificarCartaoCredito,
     validarDataNascimento,
-    validarMeioDePagamento
+    validarMeioDePagamento,
+    validarDataValidadeCartao
 };

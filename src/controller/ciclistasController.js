@@ -78,8 +78,7 @@ const criarCiclista = async (request, reply) => {
       return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.');
     }
 
-    const regexDataValidadeCartao = /^\d{4}-\d{2}$/; 
-    if (!regexDataValidadeCartao.test(novoCiclista.meioDePagamento.validade)) {
+    if (!validacoes.validarDataValidadeCartao(novoCiclista.meioDePagamento.validade)) {
       return reply.status(422).send('Formato inválido para a data de validade do cartão. Use o formato yyyy-MM.');
     }
   

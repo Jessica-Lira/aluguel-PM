@@ -51,6 +51,14 @@ test('VALIDAÇÃO de MEIO DE PAGAMENTO  deve FALHAR', () => {
   expect(serviceValidacaoCiclista.validarMeioDePagamento("","","","")).toBe(false)
 });
 
+test('VALIDAÇÃO de DATA VALIDADE CARTAO deve ser um SUCESSO', () => {
+  expect(serviceValidacaoCiclista.validarDataValidadeCartao("2028-12")).toBe(true)
+});
+
+test('VALIDAÇÃO de DATA VALIDADE CARTAO  deve FALHAR', () => {
+  expect(serviceValidacaoCiclista.validarDataValidadeCartao("12-2028")).toBe(false)
+});
+
 
 
 
