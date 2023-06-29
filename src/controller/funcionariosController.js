@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const { v1: uuidv1 } = require('uuid');
-const { funcionarios } = require('../dataFuncionarios.js');
+const { funcionarios } = require('../data/dataFuncionarios');
 const validacoes = require('../services/validacoesFuncionario.js')
 
 const getFuncionarios = async (request, reply) => {

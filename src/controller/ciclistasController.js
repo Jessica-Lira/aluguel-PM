@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
-const { ciclistas } = require('../dataCiclistas.js');
+const { ciclistas } = require('../data/dataCiclistas.js');
 const validacoes = require('../services/validacoesCiclista.js')
 const moment = require('moment');
 
@@ -97,13 +97,14 @@ const criarCiclista = async (request, reply) => {
       return reply.status(resultadoValidacaoCartao.status).send(resultadoValidacaoCartao.message);
     }
 
-      const resultadoEnvioEmail = await enviarEmail(novoCiclista.email, 'Email enviado!');
-      if (!resultadoEnvioEmail.success) {
-        return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.message);
-      }
+    const resultadoEnvioEmail = await enviarEmail(novoCiclista.email, 'Email enviado!');
+    if (!resultadoEnvioEmail.success) {
+      return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.message);
+    }
 
-      ciclistas.push(novoCiclista);
-      return reply.status(201).send(novoCiclista);
+    ciclistas.push(novoCiclista);
+    return reply.status(201).send(novoCiclista);
+
     }
   catch (error) {
     console.error(error);

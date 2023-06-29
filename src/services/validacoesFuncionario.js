@@ -1,4 +1,4 @@
-const { funcionarios } = require('../dataFuncionarios.js');
+const { funcionarios } = require('../data/dataFuncionarios.js');
 
 function validarSenha(senha,confirmacaoSenha){
 if (senha !== confirmacaoSenha) {

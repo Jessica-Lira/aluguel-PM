@@ -1,4 +1,4 @@
-const { ciclistas } = require('../dataCiclistas.js');
+const { ciclistas } = require('../data/dataCiclistas.js');
 
 function verificarCamposObrigatorios(objeto, campos) {
     for (const campo of campos) {
