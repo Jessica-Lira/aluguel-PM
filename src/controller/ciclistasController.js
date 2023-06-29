@@ -2,7 +2,6 @@ const { v4: uuidv4 } = require('uuid');
 const { ciclistas } = require('../dataCiclistas.js');
 const validacoes = require('../services/validacoesCiclista.js')
 const moment = require('moment');
-//const axios = require('axios');
 
 // dados mock aux
 let alugueis = [{
@@ -231,8 +230,6 @@ const getBicicletaAlugada = async (request, reply) => {
 try {
   const { id } = request.params;
   const ciclista = ciclistas.find(c => c.id === id);
-  // let bicicletas;
-  // axios.get('https://run.mocky.io/v3/6bb1daea-1760-45fc-9ac6-771a010e6ee8').then(resposta => {bicicletas = resposta.data; console.log("teste axios", bicicletas )})
 
   const bicicleta = {
     "id": 0,
@@ -258,13 +255,12 @@ try {
 }
 
 const postAluguel = async (request, reply) => {
-  //console.log("CHAMANDO POST ALUGUEL");
+
   try {
 
     const ciclistaId = request.body.ciclista;
-    // const trancaId = request.body.trancaInicio;
+
     const ciclista = ciclistas.find(c => c.id === ciclistaId);
-    //console.log("@@@@@@@@@@@@@@@@@@@2", ciclista);
 
     if (!ciclista) {
       return reply.status(404).send('Ciclista não encontrado');
@@ -329,8 +325,6 @@ const postAluguel = async (request, reply) => {
     };
     alugueis.push(aluguel);
     console.log("@@@@@@@@@@  ALUGUEIS  @@@@@@@@@2", alugueis);
-
-    //enviarEmail(ciclista.email, "Aluguel solicitado" + JSON.stringify(aluguel));
 
     const respostaTranca = await alterarStatusTranca(tranca.id, "DESTRANCAR");
     if(respostaTranca.statusCode !== 200) {
