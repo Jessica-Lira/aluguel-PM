@@ -106,23 +106,26 @@ function validarDataNascimento(dataNascimento){
   const regexDataNascimento = /^\d{4}-\d{2}-\d{2}$/;
     if (!regexDataNascimento.test(dataNascimento)) {
       return false
-    } 
+    } else {
     return true
+    }
 }
 
 function validarMeioDePagamento(nome,cvv,numero,validade){
   if (nome === '' || cvv ==='' || numero === '' || validade === '') {
      return false
-   } 
-   return true
+    } else {
+      return true
+      }
 } 
 
 function validarDataValidadeCartao(dataValidadeCartao){
   const regexDataValidadeCartao = /^\d{4}-\d{2}$/; 
   if (!regexDataValidadeCartao.test(dataValidadeCartao)) {
     return false
-  } 
-  return true
+  } else {
+    return true
+    }
 }
 
 module.exports = {
