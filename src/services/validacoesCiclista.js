@@ -104,11 +104,10 @@ function verificarCartaoCredito(cartao) {
 function validarDataNascimento(dataNascimento){
    // Verificar formato da data de nascimento (yyyy-MM-dd)
   const regexDataNascimento = /^\d{4}-\d{2}-\d{2}$/;
-    if (regexDataNascimento.test(dataNascimento)) {
-      return true
-    } else {
+    if (!regexDataNascimento.test(dataNascimento)) {
       return false
-    }
+    } 
+    return true
 }
 
 
