@@ -14,9 +14,6 @@ let alugueis = [{
   "valorAluguel": "10",
 },];
 
-let alugueisDevolvidos = [
-
-];
 
 let devolucoesAlugueis = [{
   "bicicleta": 123,
@@ -370,7 +367,7 @@ const postDevolucao = async (request, reply) => {
     alugueis = alugueis.filter(a => a.ciclista !== ciclista.id);
     aluguel.dataHoraDevolucao = dataHoraDevolucao;
     aluguel.valorAluguel = parseInt(aluguel.valorAluguel) + parseInt(temCobrancaExtra);
-    alugueisDevolvidos.push(aluguel);
+
     ciclista.statusAluguel = false;
     const devolucao = {
       "bicicleta": idBicicleta,
