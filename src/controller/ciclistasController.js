@@ -71,9 +71,10 @@ const criarCiclista = async (request, reply) => {
       return reply.status(422).send('Formato inválido para a data de nascimento. Use o formato yyyy-MM-dd.');
     }
 
-    if (novoCiclista.meioDePagamento.nomeTitular === '' || 
-    novoCiclista.meioDePagamento.cvv ==='' || 
-    novoCiclista.meioDePagamento.numero === '' || novoCiclista.meioDePagamento.validade ==='') {
+    if (!validacoes.validarMeioDePagamento(novoCiclista.meioDePagamento.nomeTitular, 
+    novoCiclista.meioDePagamento.cvv,
+    novoCiclista.meioDePagamento.numero, 
+    novoCiclista.meioDePagamento.validade)) {
       return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.');
     }
 

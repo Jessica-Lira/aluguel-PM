@@ -31,13 +31,24 @@ test('VALIDAÇÃO de EMAIL deve FALHAR', () => {
 });
 
 test('VALIDAÇÃO de DATA NASCIMENTO deve ser um SUCESSO', () => {
-  console.log(serviceValidacaoCiclista.validarDataNascimento("1990-03-13"))
+  //console.log(serviceValidacaoCiclista.validarDataNascimento("1990-03-13"))
   expect(serviceValidacaoCiclista.validarDataNascimento("1990-03-13")).toBe(true)
 });
 
 test('VALIDAÇÃO de DATA NASCIMENTO  deve FALHAR', () => {
-  console.log(serviceValidacaoCiclista.validarDataNascimento("13-04-1990"))
+  //console.log(serviceValidacaoCiclista.validarDataNascimento("13-04-1990"))
   expect(serviceValidacaoCiclista.validarDataNascimento("13-04-1990")).toBe(false)
+});
+
+test('VALIDAÇÃO de MEIO DE PAGAMENTO deve ser um SUCESSO', () => {
+  expect(serviceValidacaoCiclista.validarMeioDePagamento("string",
+  "984602367621417541873846007875805616119812247741040998629140438970271355",
+  "2023-06-11",
+  "4857")).toBe(true)
+});
+
+test('VALIDAÇÃO de MEIO DE PAGAMENTO  deve FALHAR', () => {
+  expect(serviceValidacaoCiclista.validarMeioDePagamento("","","","")).toBe(false)
 });
 
 

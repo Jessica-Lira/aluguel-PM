@@ -110,6 +110,13 @@ function validarDataNascimento(dataNascimento){
     return true
 }
 
+function validarMeioDePagamento(nome,cvv,numero,validade){
+  if (nome === '' || cvv ==='' || numero === '' || validade === '') {
+     return false
+   } 
+   return true
+} 
+
 
 module.exports = {
     verificarCamposObrigatorios,
@@ -119,5 +126,6 @@ module.exports = {
     verificarConfirmacaoSenha,
     validarCartaoCredito,
     verificarCartaoCredito,
-    validarDataNascimento
+    validarDataNascimento,
+    validarMeioDePagamento
 };
