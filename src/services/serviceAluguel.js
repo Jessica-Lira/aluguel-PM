@@ -1,12 +1,12 @@
 function verificarStatus(statusAluguel) {
 
-    return !(statusAluguel == false) 
+    return (statusAluguel != false) 
 
 };
 
 function verificarAtivo(ativo) {
     
-    return !(ativo == false)
+    return (ativo != false)
 };
 
   module.exports = {
