@@ -27,6 +27,10 @@ test('VALIDAÇÃO de EMAIL deve FALHAR', () => {
   expect(serviceValidacaoCiclista.verificarEmail("testegmail.com")).toHaveProperty('success', false);
 });
 
+test('VALIDAÇÃO de EMAIL sem EMAIL deve FALHAR', () => {
+  expect(serviceValidacaoCiclista.verificarEmail("")).toHaveProperty('success', false);
+});
+
 test('VALIDAÇÃO de DATA NASCIMENTO deve ser um SUCESSO', () => {
   //console.log(serviceValidacaoCiclista.validarDataNascimento("1990-03-13"))
   expect(serviceValidacaoCiclista.validarDataNascimento("1990-03-13")).toBe(true)
@@ -46,6 +50,10 @@ test('VALIDAÇÃO de MEIO DE PAGAMENTO deve ser um SUCESSO', () => {
 
 test('VALIDAÇÃO de MEIO DE PAGAMENTO  deve FALHAR', () => {
   expect(serviceValidacaoCiclista.validarMeioDePagamento("","","","")).toBe(false)
+});
+
+test('VALIDAÇÃO de MEIO DE PAGAMENTO  sem um campo deve FALHAR', () => {
+  expect(serviceValidacaoCiclista.validarMeioDePagamento("string","","2023-06-11","485")).toBe(false)
 });
 
 test('VALIDAÇÃO de DATA VALIDADE CARTAO deve ser um SUCESSO', () => {

@@ -533,7 +533,7 @@ describe('atualizarCartaoCredito route test', () => {
 
     const response = await app.inject({
       method: 'PUT',
-      url: '/ciclistas/cartaoDeCredito/1',
+      url: '/cartaoDeCredito/1',
       payload: {
         nomeTitular: 'Novo nome',
         numero: '98765432145',
@@ -643,8 +643,49 @@ describe('postAluguel route test', () => {
         "trancaInicio": "0"
       }
     });
+    expect(response.body).toBe('Aluguel realizado com sucesso')
     expect(response.statusCode).toBe(200);
   });
+
+  test('Should return message if Aluguel fail because another aluguel exist', async () => {
+    const app = build();
+    const response = await app.inject({
+      method: 'POST',
+      url: '/ciclistas/aluguel',
+      payload: {
+        "ciclista": "2",
+        "trancaInicio": "0"
+      }
+    });
+    expect(response.body).toBe('Ciclista já possui um aluguel em andamento')
+  });
+
+  test('Should return message if Aluguel fail because cyclist is not active', async () => {
+    const app = build();
+    const response = await app.inject({
+      method: 'POST',
+      url: '/ciclistas/aluguel',
+      payload: {
+        "ciclista": "5",
+        "trancaInicio": "0"
+      }
+    });
+    expect(response.body).toBe('{\"codigo\":\"422\",\"mensagem\":\"Ciclista inativo. Ative sua conta.\"}')
+  });
+
+  test('Should return message if Aluguel fail because cyclist dont exist', async () => {
+    const app = build();
+    const response = await app.inject({
+      method: 'POST',
+      url: '/ciclistas/aluguel',
+      payload: {
+        "ciclista": "6",
+        "trancaInicio": "0"
+      }
+    });
+    expect(response.body).toBe('Ciclista não encontrado')
+  });
+
 })
 
 describe('postDevolucao route test', () => {
