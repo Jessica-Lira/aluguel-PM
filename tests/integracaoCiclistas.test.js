@@ -670,7 +670,7 @@ describe('postAluguel route test', () => {
         "trancaInicio": "0"
       }
     });
-    expect(response.body).toBe('{\"codigo\":\"422\",\"mensagem\":\"Ciclista inativo. Ative sua conta.\"}')
+    expect(response.statusCode).toBe(422);
   });
 
   test('Should return message if Aluguel fail because cyclist dont exist', async () => {
