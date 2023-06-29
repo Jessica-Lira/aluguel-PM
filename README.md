@@ -7,7 +7,7 @@ Microsserviço:
 
 <h4 align="center"> 
 	Status: <br>
-	🚧  Em construção...  🚧
+	🚧  Em construção..  🚧
 </h4>
 
 <br>
