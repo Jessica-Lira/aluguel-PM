@@ -101,7 +101,7 @@ function verificarCartaoCredito(cartao) {
   );
 };
 
-function validarDataNascimento(dataNascimento){
+/* function validarDataNascimento(dataNascimento){
    // Verificar formato da data de nascimento (yyyy-MM-dd)
   const regexDataNascimento = /^\d{4}-\d{2}-\d{2}$/;
     if (!regexDataNascimento.test(dataNascimento)) {
@@ -109,6 +109,11 @@ function validarDataNascimento(dataNascimento){
     } else {
     return true
     }
+} */
+
+function validarDataNascimento(dataNascimento){
+ const regexDataNascimento = /^\d{4}-\d{2}-\d{2}$/;
+   return regexDataNascimento.test(dataNascimento) 
 }
 
 function validarMeioDePagamento(nome,cvv,numero,validade){
@@ -121,11 +126,7 @@ function validarMeioDePagamento(nome,cvv,numero,validade){
 
 function validarDataValidadeCartao(dataValidadeCartao){
   const regexDataValidadeCartao = /^\d{4}-\d{2}$/; 
-  if (!regexDataValidadeCartao.test(dataValidadeCartao)) {
-    return false
-  } else {
-    return true
-    }
+  return regexDataValidadeCartao.test(dataValidadeCartao)
 }
 
 module.exports = {
