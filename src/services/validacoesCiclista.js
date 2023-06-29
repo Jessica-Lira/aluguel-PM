@@ -66,9 +66,8 @@ function verificarNacionalidade(novoCiclista) {
     return { success: true };
 }; 
 
-function verificarConfirmacaoSenha(novoCiclista) {
-  const { senha, confirmarSenha } = novoCiclista;
-
+function verificarConfirmacaoSenha(senha,confirmarSenha) {
+ 
   if (senha !== confirmarSenha) {
     return {
       success: false,
@@ -102,6 +101,17 @@ function verificarCartaoCredito(cartao) {
   );
 };
 
+function validarDataNascimento(dataNascimento){
+   // Verificar formato da data de nascimento (yyyy-MM-dd)
+  const regexDataNascimento = /^\d{4}-\d{2}-\d{2}$/;
+    if (regexDataNascimento.test(dataNascimento)) {
+      return true
+    } else {
+      return false
+    }
+}
+
+
 module.exports = {
     verificarCamposObrigatorios,
     verificarEmail,
@@ -109,5 +119,6 @@ module.exports = {
     verificarNacionalidade,
     verificarConfirmacaoSenha,
     validarCartaoCredito,
-    verificarCartaoCredito
+    verificarCartaoCredito,
+    validarDataNascimento
 };

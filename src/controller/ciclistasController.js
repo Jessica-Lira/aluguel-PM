@@ -67,8 +67,7 @@ const criarCiclista = async (request, reply) => {
       return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.');
     }
 
-    const regexDataNascimento = /^\d{4}-\d{2}-\d{2}$/; // Verificar formato da data de nascimento (yyyy-MM-dd)
-    if (!regexDataNascimento.test(novoCiclista.nascimento)) {
+    if (!validacoes.validarDataNascimento(novoCiclista.nascimento)) {
       return reply.status(422).send('Formato inválido para a data de nascimento. Use o formato yyyy-MM-dd.');
     }
 
@@ -83,7 +82,7 @@ const criarCiclista = async (request, reply) => {
       return reply.status(422).send('Formato inválido para a data de validade do cartão. Use o formato yyyy-MM.');
     }
   
-    const resultadoVerificacaoSenha = await validacoes.verificarConfirmacaoSenha(novoCiclista);
+    const resultadoVerificacaoSenha = await validacoes.verificarConfirmacaoSenha(novoCiclista.senha,novoCiclista.confirmarSenha);
     if (!resultadoVerificacaoSenha.success) {
       return reply.status(resultadoVerificacaoSenha.status).send(resultadoVerificacaoSenha.message);
     }
