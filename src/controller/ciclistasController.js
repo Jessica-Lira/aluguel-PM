@@ -1,6 +1,8 @@
 const { v4: uuidv4 } = require('uuid');
 const { ciclistas } = require('../data/dataCiclistas.js');
 const validacoes = require('../services/validacoesCiclista.js')
+const aluguel = require('../services/serviceAluguel.js')
+
 const moment = require('moment');
 
 // dados mock aux
@@ -201,14 +203,14 @@ const permiteAluguel = async (request, reply) => {
       });
     }
     
-    if (ciclista.statusAluguel === true) {
+    if (aluguel.verificarStatus(ciclista.statusAluguel) === true) {
       return reply.status(422).send({
         codigo: '422',
         mensagem: 'Ciclista já possui um aluguel em andamento'
       });
     }
 
-    if (ciclista.ativo === false) {
+    if (aluguel.verificarStatus(ciclista.ativo) === false) {
       return reply.status(422).send({
         codigo: '422',
         mensagem: 'Ciclista inativo. Ative sua conta.'
@@ -252,11 +254,10 @@ try {
 }
 
 const postAluguel = async (request, reply) => {
-
+  
   try {
 
     const ciclistaId = request.body.ciclista;
-
     const ciclista = ciclistas.find(c => c.id === ciclistaId);
 
     if (!ciclista) {

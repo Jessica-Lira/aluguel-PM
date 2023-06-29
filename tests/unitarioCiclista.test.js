@@ -3,9 +3,6 @@ const serviceValidacaoCiclista = require('../src/services/validacoesCiclista');
 const {bodyCiclista} = require("./ciclistaMock");
 const {bodyCiclistaSemEmail} = require("./ciclistaMock");
 
-//console.log(bodyCiclista)
-//console.log(bodyCiclistaSemEmail)
-
 test('VALIDAÇÃO de SENHA deve ser um SUCESSO', () => {
   expect(serviceValidacaoCiclista.verificarConfirmacaoSenha("senhateste","senhateste")).toHaveProperty('success', true);
 });
