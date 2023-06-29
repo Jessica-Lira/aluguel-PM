@@ -632,3 +632,45 @@ describe('getBiciletaAlugada route test', () => {
 
 });
 
+describe('postAluguel route test', () => {
+  test('Should return success if Aluguel success', async () => {
+    const app = build();
+    const response = await app.inject({
+      method: 'POST',
+      url: '/ciclistas/aluguel',
+      payload: {
+        "ciclista": "3",
+        "trancaInicio": "0"
+      }
+    });
+    expect(response.statusCode).toBe(200);
+  });
+})
+
+describe('postDevolucao route test', () => {
+  test('Should return sucess if Devolucao sucess', async () => {
+    const app = build();
+    const response = await app.inject({
+      method: 'POST',
+      url: '/ciclistas/devolucao',
+      payload: {
+        "idTranca": 0,
+        "idBicicleta": "1"
+      }
+    });
+    expect(response.statusCode).toBe(200);
+  });  
+
+  test('Should return 422 if Devolucao failed', async () => {
+    const app = build();
+    const response = await app.inject({
+      method: 'POST',
+      url: '/ciclistas/devolucao',
+      payload: {
+        "idTranca": 0,
+        "idBicicleta": "2"
+      }
+    });
+    expect(response.statusCode).toBe(422);
+  });  
+})

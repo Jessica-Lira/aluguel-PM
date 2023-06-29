@@ -1,6 +1,43 @@
 const { v4: uuidv4 } = require('uuid');
 const { ciclistas } = require('../dataCiclistas.js');
 const validacoes = require('../services/validacoesCiclista.js')
+const moment = require('moment');
+//const axios = require('axios');
+
+// dados mock aux
+let alugueis = [{
+  "dataHoraRetirada": new Date().toISOString(),
+  "dataHoraDevolucao": "",
+  "numeroTranca": "123",
+  "numeroBicicleta": "123",
+  "cartaoCobranca": "984602367621417541873846007875805616119812247741040998629140438970271355",
+  "ciclista": "2",
+  "valorAluguel": "10",
+},];
+
+let alugueisDevolvidos = [
+
+];
+
+let devolucoesAlugueis = [{
+  "bicicleta": 123,
+  "horaInicio": "2023-06-29T02:52:31.331Z",
+  "trancaFim": 0,
+  "horaFim": "2023-06-29T02:52:31.331Z",
+  "cobranca": 0,
+  "ciclista": 0
+}];
+
+let bicicletas = [
+  {
+    id: "1",
+    marca: "string",
+    modelo: "string",
+    ano: "string",
+    numero: "123",
+    status: "indisponivel"
+  }
+];
 
 const getCiclistas = async (request, reply) => { //metodo aux , nao tem cdu
   try {
@@ -194,6 +231,9 @@ const getBicicletaAlugada = async (request, reply) => {
 try {
   const { id } = request.params;
   const ciclista = ciclistas.find(c => c.id === id);
+  // let bicicletas;
+  // axios.get('https://run.mocky.io/v3/6bb1daea-1760-45fc-9ac6-771a010e6ee8').then(resposta => {bicicletas = resposta.data; console.log("teste axios", bicicletas )})
+
   const bicicleta = {
     "id": 0,
     "marca": "string",
@@ -215,117 +255,155 @@ try {
 } catch (error) {
   reply.code(500).send('Erro interno do servidor');
 }
-
 }
 
 const postAluguel = async (request, reply) => {
+  //console.log("CHAMANDO POST ALUGUEL");
   try {
-  const { id } = request.params; 
-  const ciclista = ciclistas.find(c => c.id === id);
-  const numeroTranca = "01";  // ???
 
-  if (!tranca || tranca.status != "ocupada") {
-    return reply.status(422).send('Número da tranca inválido');
-  } //falta o tranca nao responde
+    const ciclistaId = request.body.ciclista;
+    // const trancaId = request.body.trancaInicio;
+    const ciclista = ciclistas.find(c => c.id === ciclistaId);
+    //console.log("@@@@@@@@@@@@@@@@@@@2", ciclista);
 
-  if (!bicicleta) {
-    return reply.status(404).send('Não existe bicicleta na tranca');
+    if (!ciclista) {
+      return reply.status(404).send('Ciclista não encontrado');
+    }
+
+    if (ciclista.ativo === false) {
+      return reply.status(422).send({
+        codigo: '422', mensagem: 'Ciclista inativo. Ative sua conta.'
+      });
+    }
+    if (ciclista.statusAluguel === true) { // Enviar email com dados do aluguel em andamento
+      const aluguel = alugueis.find(a => a.ciclista === ciclista.id);
+      await enviarEmail(ciclista.email, "Aluguel em andamento \n" + JSON.stringify(aluguel));
+      return reply.status(422).send('Ciclista já possui um aluguel em andamento');
+    }
+
+    //Futura busca em trancas get /tranca
+    const tranca = {
+      id: 0,
+      bicicleta: 123,
+      numero: 1,
+      localizacao: "string",
+      anoDeFabricacao: "string",
+      modelo: "string",
+      status: "ocupada"
+    };
+    if (!tranca || tranca.status !== "ocupada") {
+      return reply.status(422).send('Número da tranca inválido');
+    }
+
+    //Futura busca em bicicletas get /bicicleta
+    const bicicleta = {
+      id: 0,
+      marca: "string",
+      modelo: "string",
+      ano: "string",
+      numero: 0,
+      status: "disponivel"
+    };
+    if (!bicicleta || tranca.bicicleta === 0) {
+      return reply.status(404).send('Não existe bicicleta na tranca');
+    }
+    if (bicicleta.status === 'em reparo') {
+      return reply.status(404).send('Bicicleta em reparo');
+    }
+
+    //cobranca
+    const confirmacaoPagamento = await realizarCobranca(10, ciclistaId);
+    if(confirmacaoPagamento.statusCode !== 200) {
+      await incluirCobrancaNaFila(10, ciclistaId);
+      return reply.status(404).send('Pagamento não autorizado');
+    }
+
+    const aluguel = {
+      "dataHoraRetirada": new Date().toISOString(),
+      "dataHoraDevolucao": "",
+      "numeroTranca": tranca.numero,
+      "numeroBicicleta": bicicleta.numero,
+      "cartaoCobranca": ciclista.meioDePagamento.numero,
+      "ciclista": ciclista.id,
+      "valorAluguel": 10,
+    };
+    alugueis.push(aluguel);
+    console.log("@@@@@@@@@@  ALUGUEIS  @@@@@@@@@2", alugueis);
+
+    //enviarEmail(ciclista.email, "Aluguel solicitado" + JSON.stringify(aluguel));
+
+    const respostaTranca = await alterarStatusTranca(tranca.id, "DESTRANCAR");
+    if(respostaTranca.statusCode !== 200) {
+      return reply.status(422).send("Tranca não responde");
+    }
+    await enviarEmail(ciclista.email, "Aluguel solicitado \n" + JSON.stringify(aluguel));
+
+    return reply.status(200).send('Aluguel realizado com sucesso' );
+  } catch (error) {
+    console.error(error);
+    reply.status(500).send('Erro interno do servidor');
   }
-
-  if (!ciclista) {
-    return reply.status(404).send('Ciclista não encontrado');
-  }
-
-  if (ciclista.statusAluguel === true) { // Enviar email com dados do aluguel em andamento
-    enviarEmail(ciclista.email, "Aluguel em andamento" + JSON.stringify(ciclista.aluguel)); 
-    return reply.status(422).send('Ciclista já possui um aluguel em andamento');
-  }
-  
-  if (ciclista.ativo === false) {
-    return reply.status(422).send({
-      codigo: '422', mensagem: 'Ciclista inativo. Ative sua conta.'
-    });
-  }
-
-  if (bicicleta.status == 'em reparo') {
-    return reply.status(404).send('Bicicleta em reparo');
-  }
-
-  const confirmacaoPagamento = await verificarPagamento(pagamento);
-  if (!confirmacaoPagamento) { //falta o erro no pagamento
-    return reply.status(404).send('Pagamento não autorizado');
-  }
-
-  //cobranca
-  const aluguel = {
-    dataHoraRetirada: new Date(),
-    numeroTranca,
-    numeroBicicleta: bicicleta.numero,
-    cartaoCobranca: ciclista.meioDePagamento.numero,
-    ciclista: ciclista.nome, 
-    valorAluguel: "",
-  };
-
-  enviarEmail(ciclista.email, "Aluguel solicitado" + JSON.stringify(aluguel));
-  bicicleta.status = 'em uso';
-  tranca.status = 'livre';
-  
-  return reply.status(200).send('Aluguel realizado com sucesso' + JSON.stringify(aluguel));
-} catch (error) {
-  console.error(error);
-  reply.status(500).send('Erro interno do servidor');
-}
 };
 
 const postDevolucao = async (request, reply) => {
-try {
-  const { id } = request.params; 
-  const ciclista = ciclistas.find(c => c.id === id);
-  const tranca = { numeroTranca: "01", status: "disponivel" };
-  const bicicleta = { numeroBicicleta: "01", status: "em uso" };
-  const dataHoraDevolucao = moment().format('YYYY-MM-DD HH:mm:ss');
+  console.log("CHAMANDO POST DEVOLUÇÃO");
+  try {
+    const { idTranca, idBicicleta } = request.body;
+    const solicitouReparo = false;
+    //Futura busca em bicicletas get /bicicleta
+    const bicicleta = bicicletas.find(b => b.id === idBicicleta);
+    if(!bicicleta){
+      return reply.status(422).send("Número da bicicleta inválido");
+    }
 
-  if (!ciclista.statusAluguel) {
-    return reply.status(400).send('O ciclista não possui uma bicicleta alugada');
+    const aluguel = alugueis.find(a => a.numeroBicicleta === bicicleta.numero);
+    const ciclista = ciclistas.find(c => c.id === aluguel.ciclista);
+
+    const dataHoraDevolucao = new Date().toISOString();
+
+    const temCobrancaExtra = calcularDiferencaEValor("2023-06-29T00:22:54.485Z", "2023-06-29T03:52:54.485Z");
+    console.log("$@342342342342342342342342342342342", temCobrancaExtra)
+    if(temCobrancaExtra !== 0){
+      realizarCobranca(temCobrancaExtra, ciclista.id)
+          .then(response => {
+            console.log("Cobrança efetuada com sucesso", response.data);
+          }).catch( async err => {
+        console.log("Erro na tentativa de cobrança. Cobrança enviada para fila.");
+        await incluirCobrancaNaFila(temCobrancaExtra, ciclista.id);
+      });
+    }
+
+    alugueis = alugueis.filter(a => a.ciclista !== ciclista.id);
+    aluguel.dataHoraDevolucao = dataHoraDevolucao;
+    aluguel.valorAluguel = parseInt(aluguel.valorAluguel) + parseInt(temCobrancaExtra);
+    alugueisDevolvidos.push(aluguel);
+    ciclista.statusAluguel = false;
+    const devolucao = {
+      "bicicleta": idBicicleta,
+      "horaInicio": aluguel.dataHoraRetirada,
+      "trancaFim": idTranca,
+      "horaFim": dataHoraDevolucao,
+      "cobranca": temCobrancaExtra,
+      "ciclista": 0
+    }
+    devolucoesAlugueis.push(devolucao);
+    console.log("@@@@@@@@  DEVOLUÇÃO ALUGUEL @@@@@@", devolucoesAlugueis)
+
+    await alterarStatusTranca(idTranca, "TRANCAR");
+    await enviarEmail(ciclista.email, "Devolução da bicicleta bem sucedida. " + JSON.stringify(aluguel))
+    console.log("$$$$  ALUGUEL   $$$", aluguel);
+
+    if(solicitouReparo){
+      await alterarStatusBicicleta(idBicicleta, "REPARO_SOLICITADO");
+      return reply.status(200).send('Bicicleta foi devolvida e será reparada');
+    }
+    await alterarStatusBicicleta(idBicicleta, "DISPONIVEL");
+
+    return reply.status(200).send('Bicicleta devolvida com sucesso '  + JSON.stringify(aluguel));
+  } catch (error) {
+    console.error(error);
+    reply.status(422).send('Dados inválidos');
   }
-
-  if (tranca === undefined || tranca.status != "disponivel") {
-    return reply.status(422).send('Número da tranca inválido');
-  } //falta o tranca nao responde
-
-  if (bicicleta === undefined || bicicleta.status != 'em uso') {
-    return reply.status(404).send('Número da bicicleta inválido');
-  }
-
-  const valorAluguel = calcularValorAluguel("27/06/2023", "10:00", "27/06/2023", "13:30");
-  console.log(`Valor do aluguel: R$ ${valorAluguel}`);
-
-  const aluguel = {
-    dataHoraRetirada: dataHoraRetirada,
-    dataHoraDevolucao: new Date(),
-    numeroTranca: tranca.numeroTranca,
-    numeroBicicleta: bicicleta.numeroBicicleta,
-    cartaoCobranca: ciclista.meioDePagamento.numero,
-    ciclista: ciclista.nome, 
-    valorAluguel: valorAluguel,
-  };
-  console.log( 'aluguel' + aluguel)
-
-  const confirmacaoPagamento = await verificarPagamento(pagamento);
-  if (!confirmacaoPagamento) { //falta o erro no pagamento
-    return reply.status(404).send('Pagamento não autorizado');
-  }
-
-  bicicleta.status = 'disponivel';
-  tranca.status = 'ocupada';
-
-  enviarEmail(ciclista.email, "Aluguel" + JSON.stringify(aluguel));
-
-  return reply.status(200).send('Bicicleta devolvida com sucesso');
-} catch (error) {
-  console.error(error);
-  reply.status(422).send('Dados inválidos');
-}
 };
 
 /* ********                EMAIL                   ********    */
@@ -457,37 +535,67 @@ const enviarEmail = async (email, mensagem) => {
 
 //METODOS AUX DO POST ALUGUEL
 
-const verificarPagamento = async (meioDePagamento, bicicleta) => {
-  // Simulacao da cobrança
-  //const pagamento = pagamento.realizarCobranca(meioDePagamento, bicicleta);
-
-  const pagamento = true;
-
-  if (!pagamento) { return {success: false, status: 404, message: ''}  }
-  return { success: true, status: 200 };
-};
-
-const calcularValorAluguel = async(dataInicio, horaInicio, dataFim, horaFim) => {
-  const formatoDataHora = "DD/MM/YYYY HH:mm";
-  const dataHoraInicio = moment(dataInicio + " " + horaInicio, formatoDataHora);
-  const dataHoraFim = moment(dataFim + " " + horaFim, formatoDataHora);
-
-  const duracaoAluguel = moment.duration(dataHoraFim.diff(dataHoraInicio));
-  const horasIniciais = moment.duration(2, 'hours');
-  const meiaHoraExcedente = moment.duration(30, 'minutes');
-  let valorTotal = 0;
-
-  if (duracaoAluguel <= horasIniciais) {
-    valorTotal = 0;
-  } else {
-    const duracaoExcedente = duracaoAluguel.subtract(horasIniciais);
-    valorTotal = 10.0;
-    while (duracaoExcedente > meiaHoraExcedente) {
-      valorTotal += 5.0;
-      duracaoExcedente.subtract(meiaHoraExcedente);
-    }
+const alterarStatusTranca = async (idTranca, acao) => {
+  //CHAMAR O ENDPOINT DO JAO ///POST tranca/{idTranca}/status/{acao} ////////////acao = DESTRANCAR OU TRANCAR
+  const message = {
+    "id": 0,
+    "bicicleta": 0,
+    "numero": 1,
+    "localizacao": "string",
+    "anoDeFabricacao": "string",
+    "modelo": "string",
+    "status": "string"
   }
-  return valorTotal.toFixed(2);
+
+  return {statusCode: 200, message};
+}
+
+const alterarStatusBicicleta = async (idBicicleta, acao) => {
+  const message =
+  {
+    "id": idBicicleta,
+      "marca": "string",
+      "modelo": "string",
+      "ano": "string",
+      "numero": 0,
+      "status": "string"
+  }
+
+  return { statusCode: 200, message }
+}
+
+const realizarCobranca = async (valor, ciclistaId) => {
+  //CHAMAR O ENDPOINT DA MARIANA
+  const message =     {
+        "id": "b46d0649-1a5c-4489-86d8-2a8434e9e4e4",
+        "status": "PAGA",
+        "horaSolicitacao": "2023-06-28T00:19:45.384Z",
+        "horaFinalizacao": "2023-06-28T00:19:48.146Z",
+        "valor": valor,
+        "ciclista": ciclistaId
+      };
+  return {statusCode: 200, message};
+}
+
+const incluirCobrancaNaFila = async (valor, ciclistaId) => {
+  //CHAMAR ENDPOINT MARIANA /filaCobranca
+  return {statusCode: 200, message:"IGUAL DO REALIZAR COBRANCA"};
+}
+
+function calcularDiferencaEValor(dataHoraRetirada, dataHoraDevolucao) {
+  const diferenca = moment(dataHoraDevolucao).diff(moment(dataHoraRetirada), 'hours');
+  console.log("#################diferenca#############3", diferenca);
+  let valor = 0;
+
+  if (diferenca > 2) {
+    const horasExcedidas = diferenca - 2;
+    const intervaloCobranca = 0.5; // Intervalo de 30 minutos
+    const valorAdicional = 5; // Valor adicional por intervalo excedido
+
+    valor = horasExcedidas * (valorAdicional / intervaloCobranca);
+  }
+
+  return valor;
 }
 
 module.exports = {
