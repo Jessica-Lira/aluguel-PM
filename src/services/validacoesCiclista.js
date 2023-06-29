@@ -101,27 +101,13 @@ function verificarCartaoCredito(cartao) {
   );
 };
 
-/* function validarDataNascimento(dataNascimento){
-   // Verificar formato da data de nascimento (yyyy-MM-dd)
-  const regexDataNascimento = /^\d{4}-\d{2}-\d{2}$/;
-    if (!regexDataNascimento.test(dataNascimento)) {
-      return false
-    } else {
-    return true
-    }
-} */
-
 function validarDataNascimento(dataNascimento){
  const regexDataNascimento = /^\d{4}-\d{2}-\d{2}$/;
    return regexDataNascimento.test(dataNascimento) 
 }
 
 function validarMeioDePagamento(nome,cvv,numero,validade){
-  if (nome === '' || cvv ==='' || numero === '' || validade === '') {
-     return false
-    } else {
-      return true
-      }
+  return !(nome === '' || cvv ==='' || numero === '' || validade === '') 
 } 
 
 function validarDataValidadeCartao(dataValidadeCartao){
