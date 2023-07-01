@@ -14,8 +14,8 @@ const routesCiclista = async (fastify) => {
     fastify.put('/cartaoDeCredito/:id', ciclistasController.atualizarCartaoCredito);
     fastify.get('/ciclistas/existeEmail/:email', ciclistasController.getExisteEmail);
     fastify.get('/ciclistas/:id/bicicletaAlugada', ciclistasController.getBicicletaAlugada);
-    fastify.post('/ciclistas/aluguel', ciclistasController.postAluguel);
-    fastify.post('/ciclistas/devolucao', ciclistasController.postDevolucao);
+    fastify.post('/aluguel', ciclistasController.postAluguel);
+    fastify.post('/devolucao', ciclistasController.postDevolucao);
 }
 
 module.exports = routesCiclista;

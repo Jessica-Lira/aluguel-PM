@@ -637,7 +637,7 @@ describe('postAluguel route test', () => {
     const app = build();
     const response = await app.inject({
       method: 'POST',
-      url: '/ciclistas/aluguel',
+      url: '/aluguel',
       payload: {
         "ciclista": "3",
         "trancaInicio": "0"
@@ -651,7 +651,7 @@ describe('postAluguel route test', () => {
     const app = build();
     const response = await app.inject({
       method: 'POST',
-      url: '/ciclistas/aluguel',
+      url: '/aluguel',
       payload: {
         "ciclista": "2",
         "trancaInicio": "0"
@@ -664,7 +664,7 @@ describe('postAluguel route test', () => {
     const app = build();
     const response = await app.inject({
       method: 'POST',
-      url: '/ciclistas/aluguel',
+      url: '/aluguel',
       payload: {
         "ciclista": "5",
         "trancaInicio": "0"
@@ -677,7 +677,7 @@ describe('postAluguel route test', () => {
     const app = build();
     const response = await app.inject({
       method: 'POST',
-      url: '/ciclistas/aluguel',
+      url: '/aluguel',
       payload: {
         "ciclista": "6",
         "trancaInicio": "0"
@@ -693,7 +693,7 @@ describe('postDevolucao route test', () => {
     const app = build();
     const response = await app.inject({
       method: 'POST',
-      url: '/ciclistas/devolucao',
+      url: '/devolucao',
       payload: {
         "idTranca": 0,
         "idBicicleta": "1"
@@ -706,7 +706,7 @@ describe('postDevolucao route test', () => {
     const app = build();
     const response = await app.inject({
       method: 'POST',
-      url: '/ciclistas/devolucao',
+      url: '/devolucao',
       payload: {
         "idTranca": 0,
         "idBicicleta": "2"

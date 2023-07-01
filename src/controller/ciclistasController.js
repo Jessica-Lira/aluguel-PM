@@ -2,7 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const { ciclistas } = require('../data/dataCiclistas.js');
 const validacoes = require('../services/validacoesCiclista.js')
 const aluguel = require('../services/serviceAluguel.js')
-
+const axios = require('axios');
 const moment = require('moment');
 
 // dados mock aux
@@ -98,6 +98,12 @@ const criarCiclista = async (request, reply) => {
     if (!resultadoValidacaoCartao.success) {
       return reply.status(resultadoValidacaoCartao.status).send(resultadoValidacaoCartao.message);
     }
+
+    //enviar email
+    /*
+    let email;
+    axios.get('https://gentle-bee-shrug.cyclic.app/enviarEmail').then(resposta => {email = resposta.data; console.log("teste axios", email )})
+    */
 
     const resultadoEnvioEmail = await enviarEmail(novoCiclista.email, 'Email enviado!');
     if (!resultadoEnvioEmail.success) {
