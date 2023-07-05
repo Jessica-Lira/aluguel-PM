@@ -2,7 +2,8 @@ const { v4: uuidv4 } = require('uuid');
 const { ciclistas } = require('../data/dataCiclistas.js');
 const validacoes = require('../services/validacoesCiclista.js')
 const aluguel = require('../services/serviceAluguel.js')
-const axios = require('axios');
+const enviarEmailApi = require ('../apis/enviarEmailApi.js')
+
 const moment = require('moment');
 
 // dados mock aux
@@ -15,7 +16,6 @@ let alugueis = [{
   "ciclista": "2",
   "valorAluguel": "10",
 },];
-
 
 let devolucoesAlugueis = [{
   "bicicleta": 123,
@@ -99,15 +99,9 @@ const criarCiclista = async (request, reply) => {
       return reply.status(resultadoValidacaoCartao.status).send(resultadoValidacaoCartao.message);
     }
 
-    //enviar email
-    /*
-    let email;
-    axios.get('https://gentle-bee-shrug.cyclic.app/enviarEmail').then(resposta => {email = resposta.data; console.log("teste axios", email )})
-    */
-
-    const resultadoEnvioEmail = await enviarEmail(novoCiclista.email, 'Email enviado!');
-    if (!resultadoEnvioEmail.success) {
-      return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.message);
+    const resultadoEnvioEmail = await enviarEmailApi.enviarEmail(novoCiclista.email, "Ciclista Email", "Cadastro realizado.");
+    if (resultadoEnvioEmail.statusCode !== 200) {
+      return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.data);
     }
 
     ciclistas.push(novoCiclista);
@@ -521,14 +515,6 @@ const getDadosCiclista = (ciclista) => {
     email: ciclista.email,
     urlFotoDocumento: ciclista.urlFotoDocumento
   };
-};
-
-const enviarEmail = async (email, mensagem) => {
-    // Envio de e-mail vi API
-
-    return { 
-      success: true, status: 200, message: 'E-mail enviado com sucesso.'
-    };
 };
 
 //METODOS AUX DO POST ALUGUEL
