@@ -84,12 +84,12 @@ const criarCiclista = async (request, reply) => {
       return reply.status(422).send('Formato inválido para a data de validade do cartão. Use o formato yyyy-MM.');
     }
   
-    const resultadoVerificacaoSenha = await validacoes.verificarConfirmacaoSenha(novoCiclista.senha,novoCiclista.confirmarSenha);
+    const resultadoVerificacaoSenha = validacoes.verificarConfirmacaoSenha(novoCiclista.senha, novoCiclista.confirmarSenha);
     if (!resultadoVerificacaoSenha.success) {
       return reply.status(resultadoVerificacaoSenha.status).send(resultadoVerificacaoSenha.message);
     }
 
-    const resultadoVerificacaoNacionalidade = await validacoes.verificarNacionalidade(novoCiclista);
+    const resultadoVerificacaoNacionalidade = validacoes.verificarNacionalidade(novoCiclista);
     if (!resultadoVerificacaoNacionalidade.success) {
       return reply.status(resultadoVerificacaoNacionalidade.status).send(resultadoVerificacaoNacionalidade.message);
     }
@@ -99,10 +99,10 @@ const criarCiclista = async (request, reply) => {
       return reply.status(resultadoValidacaoCartao.status).send(resultadoValidacaoCartao.message);
     }
 
-    const resultadoEnvioEmail = await enviarEmailApi.enviarEmail(novoCiclista.email, "Ciclista Email", "Cadastro realizado.");
+    const resultadoEnvioEmail = await enviarEmailApi.enviarEmail(novoCiclista.email, "Bicicletário System", "Cadastro realizado."  + JSON.stringify(novoCiclista));
     if (resultadoEnvioEmail.statusCode !== 200) {
-      return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.data);
-    }
+      return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.data + ". Email enviado e aguardando confirmação.");
+    } 
 
     ciclistas.push(novoCiclista);
     return reply.status(201).send(novoCiclista);
@@ -153,10 +153,10 @@ const atualizarCiclista = async(request, reply) => {
       return reply.status(422).send('Dados inválidos. A senha e a confirmação de senha devem ser iguais.');
     }
 
-    const resultadoEnvioEmail = await enviarEmail(ciclista.email, 'OS dados da sua conta foram atualizados!' + JSON.stringify(ciclista));
-    if (!resultadoEnvioEmail.success) {
-      return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.message);
-    }
+    const resultadoEnvioEmail = await enviarEmailApi.enviarEmail(ciclista.email, "Bicicletário System", "Os dados da sua conta foram atualizados!." + JSON.stringify(ciclista));
+    if (resultadoEnvioEmail.statusCode !== 200) {
+      return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.data);
+    } 
 
     ciclistas[ciclistas.indexOf(ciclista)] = { ...ciclista, ...dadosAtualizados };
 
@@ -271,8 +271,8 @@ const postAluguel = async (request, reply) => {
     }
     if (ciclista.statusAluguel === true) { // Enviar email com dados do aluguel em andamento
       const aluguel = alugueis.find(a => a.ciclista === ciclista.id);
-      await enviarEmail(ciclista.email, "Aluguel em andamento \n" + JSON.stringify(aluguel));
-      return reply.status(422).send('Ciclista já possui um aluguel em andamento');
+      await enviarEmailApi.enviarEmail(ciclista.email, "Bicicletário System",  "Aluguel em andamento \n" + JSON.stringify(aluguel));
+      return reply.status(422).send('Ciclista já possui um aluguel em andamento.');
     }
 
     //Futura busca em trancas get /tranca
@@ -328,9 +328,9 @@ const postAluguel = async (request, reply) => {
     if(respostaTranca.statusCode !== 200) {
       return reply.status(422).send("Tranca não responde");
     }
-    await enviarEmail(ciclista.email, "Aluguel solicitado \n" + JSON.stringify(aluguel));
+    await enviarEmailApi.enviarEmail(ciclista.email, "Bicicletário System", "Aluguel solicitado \n" + JSON.stringify(aluguel));
 
-    return reply.status(200).send('Aluguel realizado com sucesso' );
+    return reply.status(200).send('Aluguel solicitado com sucesso' );
   } catch (error) {
     console.error(error);
     reply.status(500).send('Erro interno do servidor');
@@ -382,7 +382,7 @@ const postDevolucao = async (request, reply) => {
     console.log("@@@@@@@@  DEVOLUÇÃO ALUGUEL @@@@@@", devolucoesAlugueis)
 
     await alterarStatusTranca(idTranca, "TRANCAR");
-    await enviarEmail(ciclista.email, "Devolução da bicicleta bem sucedida. " + JSON.stringify(aluguel))
+    await enviarEmailApi.enviarEmail(ciclista.email, "Bicicletário System", "Devolução da bicicleta bem sucedida. " + JSON.stringify(aluguel))
     console.log("$$$$  ALUGUEL   $$$", aluguel);
 
     if(solicitouReparo){
