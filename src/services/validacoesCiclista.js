@@ -78,18 +78,6 @@ function verificarConfirmacaoSenha(senha,confirmarSenha) {
   return { success: true };
 };
 
-function validarCartaoCredito(cartao){
-  // Lógica de validação do cartão de crédito real por API
-
-  let cartaoAprovado = cartao.cvv !== "666";
-
-  if (cartaoAprovado) {
-    return { success: true, status: 200, message: '' };
-  } else {
-    return { success: false, status: 422, message: 'O cartão foi recusado. Entre com um cartão valido.' };
-  }
-};
-
 function verificarCartaoCredito(cartao) {
   const { nomeTitular, numero, validade, cvv } = cartao;
 
@@ -121,7 +109,6 @@ module.exports = {
     validarFormatoEmail,
     verificarNacionalidade,
     verificarConfirmacaoSenha,
-    validarCartaoCredito,
     verificarCartaoCredito,
     validarDataNascimento,
     validarMeioDePagamento,

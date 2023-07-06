@@ -56,7 +56,7 @@ let ciclistas = [
         pais: "TX"
       },
       nacionalidade: "string",
-      email: "user@example.com",
+      email: "contatojlira@gmail.com",
       urlFotoDocumento: "string",
       senha: "string",
       meioDePagamento: {

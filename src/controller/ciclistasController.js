@@ -3,6 +3,7 @@ const { ciclistas } = require('../data/dataCiclistas.js');
 const validacoes = require('../services/validacoesCiclista.js')
 const aluguel = require('../services/serviceAluguel.js')
 const enviarEmailApi = require ('../apis/enviarEmailApi.js')
+const validaCartaoDeCreditoApi = require ('../apis/validaCartaoDeCreditoApi.js')
 
 const moment = require('moment');
 
@@ -93,15 +94,15 @@ const criarCiclista = async (request, reply) => {
     if (!resultadoVerificacaoNacionalidade.success) {
       return reply.status(resultadoVerificacaoNacionalidade.status).send(resultadoVerificacaoNacionalidade.message);
     }
-  
-    const resultadoValidacaoCartao = validacoes.validarCartaoCredito(novoCiclista.meioDePagamento);
-    if (!resultadoValidacaoCartao.success) {
-      return reply.status(resultadoValidacaoCartao.status).send(resultadoValidacaoCartao.message);
-    }
+
+    const resultadoValidacaoCartao = await validaCartaoDeCreditoApi.validaCartaoDeCredito(novoCiclista.meioDePagamento.nomeTitular, novoCiclista.meioDePagamento.numero, novoCiclista.meioDePagamento.validade, novoCiclista.meioDePagamento.cvv);
+    if (resultadoValidacaoCartao.status !== 200) {
+      return reply.status(resultadoValidacaoCartao.status).send(resultadoValidacaoCartao.data + ". O cartão foi recusado. Entre com um cartão valido.");
+    } 
 
     const resultadoEnvioEmail = await enviarEmailApi.enviarEmail(novoCiclista.email, "Bicicletário System", "Cadastro realizado."  + JSON.stringify(novoCiclista));
-    if (resultadoEnvioEmail.statusCode !== 200) {
-      return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.data + ". Email enviado e aguardando confirmação.");
+    if (resultadoEnvioEmail.status !== 200) {
+      return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.data + ". Email não enviado");
     } 
 
     ciclistas.push(novoCiclista);
@@ -154,8 +155,8 @@ const atualizarCiclista = async(request, reply) => {
     }
 
     const resultadoEnvioEmail = await enviarEmailApi.enviarEmail(ciclista.email, "Bicicletário System", "Os dados da sua conta foram atualizados!." + JSON.stringify(ciclista));
-    if (resultadoEnvioEmail.statusCode !== 200) {
-      return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.data);
+    if (resultadoEnvioEmail.status !== 200) {
+      return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.data + ". Email não enviado.");
     } 
 
     ciclistas[ciclistas.indexOf(ciclista)] = { ...ciclista, ...dadosAtualizados };
@@ -307,7 +308,7 @@ const postAluguel = async (request, reply) => {
 
     //cobranca
     const confirmacaoPagamento = await realizarCobranca(10, ciclistaId);
-    if(confirmacaoPagamento.statusCode !== 200) {
+    if(confirmacaoPagamento.status !== 200) {
       await incluirCobrancaNaFila(10, ciclistaId);
       return reply.status(404).send('Pagamento não autorizado');
     }
@@ -325,7 +326,7 @@ const postAluguel = async (request, reply) => {
     console.log("@@@@@@@@@@  ALUGUEIS  @@@@@@@@@2", alugueis);
 
     const respostaTranca = await alterarStatusTranca(tranca.id, "DESTRANCAR");
-    if(respostaTranca.statusCode !== 200) {
+    if(respostaTranca.status !== 200) {
       return reply.status(422).send("Tranca não responde");
     }
     await enviarEmailApi.enviarEmail(ciclista.email, "Bicicletário System", "Aluguel solicitado \n" + JSON.stringify(aluguel));
@@ -477,16 +478,15 @@ const atualizarCartaoCredito = async (request, reply) => {
       return reply.status(404).send('Ciclista não encontrado');
     }
 
-    //cartao aprovado/reprovado
-    const isValid = validacoes.validarCartaoCredito(dadosAtualizados);
-    if (!isValid) {
-      return reply.status(422).send('Dados inválidos. Forneça um cartão válido.');
-    }
+    const isValid= await validaCartaoDeCreditoApi.validaCartaoDeCredito(dadosAtualizados.nomeTitular, dadosAtualizados.numero, dadosAtualizados.validade, dadosAtualizados.cvv);
+    if (isValid.status !== 200) {
+      return reply.status(isValid.status).send(isValid.data + ". O cartão foi recusado. Entre com um cartão valido.");
+    } 
 
-    const resultadoEnvioEmail = await enviarEmail(ciclista, 'Email enviado!');
-    if (!resultadoEnvioEmail.success) {
-      return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.message);
-    }
+    const resultadoEnvioEmail = await enviarEmailApi.enviarEmail(ciclista.email, "Bicicletário System", "Cartão atualizado."  + JSON.stringify(ciclista));
+    if (resultadoEnvioEmail.status !== 200) {
+      return reply.status(resultadoEnvioEmail.status).send(resultadoEnvioEmail.data + ". Email não enviado.");
+    } 
 
     ciclista.meioDePagamento = { ...ciclista.meioDePagamento, ...dadosAtualizados };
 
@@ -494,7 +494,6 @@ const atualizarCartaoCredito = async (request, reply) => {
   } catch (error) {
     console.error(error);
     reply.status(422).send('Dados inválidos');
-
   }
 };
 
@@ -531,7 +530,7 @@ const alterarStatusTranca = async (idTranca, acao) => {
     "status": "string"
   }
 
-  return {statusCode: 200, message};
+  return {status: 200, message};
 }
 
 const alterarStatusBicicleta = async (idBicicleta, acao) => {
@@ -545,7 +544,7 @@ const alterarStatusBicicleta = async (idBicicleta, acao) => {
       "status": "string"
   }
 
-  return { statusCode: 200, message }
+  return { status: 200, message }
 }
 
 const realizarCobranca = async (valor, ciclistaId) => {
@@ -558,12 +557,12 @@ const realizarCobranca = async (valor, ciclistaId) => {
         "valor": valor,
         "ciclista": ciclistaId
       };
-  return {statusCode: 200, message};
+  return {status: 200, message};
 }
 
 const incluirCobrancaNaFila = async (valor, ciclistaId) => {
   //CHAMAR ENDPOINT MARIANA /filaCobranca
-  return {statusCode: 200, message:"IGUAL DO REALIZAR COBRANCA"};
+  return {status: 200, message:"IGUAL DO REALIZAR COBRANCA"};
 }
 
 function calcularDiferencaEValor(dataHoraRetirada, dataHoraDevolucao) {
