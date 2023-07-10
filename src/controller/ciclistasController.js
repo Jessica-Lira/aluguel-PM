@@ -4,7 +4,12 @@ const validacoes = require('../services/validacoesCiclista.js')
 const aluguel = require('../services/serviceAluguel.js')
 const enviarEmailApi = require ('../apis/enviarEmailApi.js')
 const validaCartaoDeCreditoApi = require ('../apis/validaCartaoDeCreditoApi.js')
-
+const cobrancaApi = require ('../apis/cobrancaApi.js')
+const filaCobrancaApi = require ('../apis/filaCobrancaApi.js')
+const getBicicletaApi = require ('../apis/getBicicletaApi.js')
+const getTrancaApi = require ('../apis/getTrancaApi.js')
+const bicicletaStatusApi = require ('../apis/bicicletaStatusApi.js')
+const trancaStatusApi = require ('../apis/trancaStatusApi.js')
 const moment = require('moment');
 
 // dados mock aux
@@ -169,6 +174,7 @@ const atualizarCiclista = async(request, reply) => {
   }
 };
 
+//rever, falta x-id-requisicao
 const ativarCadastroCiclista = async (request, reply) => {
   try {
     const { id } = request.params;
@@ -226,6 +232,7 @@ const permiteAluguel = async (request, reply) => {
   }
 };
 
+//reformular
 const getBicicletaAlugada = async (request, reply) => {
 try {
   const { id } = request.params;
@@ -264,7 +271,6 @@ const postAluguel = async (request, reply) => {
     if (!ciclista) {
       return reply.status(404).send('Ciclista não encontrado');
     }
-
     if (ciclista.ativo === false) {
       return reply.status(422).send({
         codigo: '422', mensagem: 'Ciclista inativo. Ative sua conta.'
@@ -277,6 +283,7 @@ const postAluguel = async (request, reply) => {
     }
 
     //Futura busca em trancas get /tranca
+    /*
     const tranca = {
       id: 0,
       bicicleta: 123,
@@ -289,8 +296,14 @@ const postAluguel = async (request, reply) => {
     if (!tranca || tranca.status !== "ocupada") {
       return reply.status(422).send('Número da tranca inválido');
     }
+    */
+    const resultadoTranca = await getTrancaApi.getTranca();
+    if (resultadoTranca.status !== 200) {
+      return reply.status(resultadoTranca.status).send(resultadoTranca.data + ". Número da tranca inválido");
+    } 
 
     //Futura busca em bicicletas get /bicicleta
+    /*
     const bicicleta = {
       id: 0,
       marca: "string",
@@ -305,6 +318,11 @@ const postAluguel = async (request, reply) => {
     if (bicicleta.status === 'em reparo') {
       return reply.status(404).send('Bicicleta em reparo');
     }
+    */
+    const resultadoBicicleta = await getBicicletaApi.getBicicleta();
+    if (resultadoBicicleta.status !== 200) {
+      return reply.status(resultadoBicicleta.status).send(resultadoBicicleta.data + ". Não existe bicicleta na tranca");
+    } 
 
     //cobranca
     const confirmacaoPagamento = await realizarCobranca(10, ciclistaId);
@@ -329,6 +347,7 @@ const postAluguel = async (request, reply) => {
     if(respostaTranca.status !== 200) {
       return reply.status(422).send("Tranca não responde");
     }
+
     await enviarEmailApi.enviarEmail(ciclista.email, "Bicicletário System", "Aluguel solicitado \n" + JSON.stringify(aluguel));
 
     return reply.status(200).send('Aluguel solicitado com sucesso' );
@@ -516,8 +535,7 @@ const getDadosCiclista = (ciclista) => {
   };
 };
 
-//METODOS AUX DO POST ALUGUEL
-
+//ubstituir
 const alterarStatusTranca = async (idTranca, acao) => {
   //CHAMAR O ENDPOINT DO JAO ///POST tranca/{idTranca}/status/{acao} ////////////acao = DESTRANCAR OU TRANCAR
   const message = {
