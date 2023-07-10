@@ -32,6 +32,7 @@ let devolucoesAlugueis = [{
   "ciclista": 0
 }];
 
+/*
 let bicicletas = [
   {
     id: "1",
@@ -42,6 +43,7 @@ let bicicletas = [
     status: "indisponivel"
   }
 ];
+*/
 
 const getCiclistas = async (request, reply) => { //metodo aux , nao tem cdu
   try {

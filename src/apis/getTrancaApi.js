@@ -5,7 +5,7 @@ const log = require('../utils/logUtils');
 
 const getTranca = async () => {
     console.log("Chamando função getTranca");
-    return axios.get('https://gentle-bracelet-wasp.cyclic.app/tranca')
+    return axios.get(`https://gentle-bracelet-wasp.cyclic.app/tranca/${idTranca}`)
         .then(response  => {
             log.info('Requisição retornada com sucesso');
             console.log("@@@@@#@@ response ", response);
