@@ -9,12 +9,12 @@ const bicicletaStatus = async (idBicicleta, acao) => {
     return axios.post(`https://gentle-bracelet-wasp.cyclic.app/bicicleta/${idBicicleta}/status/${acao}`, body)
         .then(response  => {
             log.info('Status da bicicleta alterado com sucesso');
-            console.log("@@@@@#@@ response ", response); 
-            return response;
+            console.log("@@@@@#@@ response ", response.data);
+            return response.data;
         }).catch(err => {
             log.error('Falha na requisição para alterar status bicicleta');
-            console.log("@@@@@@@@ error", err.response);
-            return err.response;
+            console.log("@@@@@@@@ error", err.response.data);
+            return err.response.data;
         })
 }
 

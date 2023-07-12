@@ -11,13 +11,15 @@ const getTrancaApi = require ('../apis/getTrancaApi.js')
 const bicicletaStatusApi = require ('../apis/bicicletaStatusApi.js')
 const trancaStatusApi = require ('../apis/trancaStatusApi.js')
 const moment = require('moment');
+const {getPermiteAluguel} = require("../apis/permiteAluguelApi");
+const permiteAluguelApi = require("../apis/permiteAluguelApi");
 
 // dados mock aux
 let alugueis = [{
   "dataHoraRetirada": new Date().toISOString(),
   "dataHoraDevolucao": "",
   "numeroTranca": "123",
-  "numeroBicicleta": "123",
+  "numeroBicicleta": "2000",
   "cartaoCobranca": "984602367621417541873846007875805616119812247741040998629140438970271355",
   "ciclista": "2",
   "valorAluguel": "10",
@@ -211,11 +213,13 @@ const permiteAluguel = async (request, reply) => {
         mensagem: 'Ciclista não encontrado'
       });
     }
-    
+
     if (aluguel.verificarStatus(ciclista.statusAluguel) === true) {
       return reply.status(422).send({
         codigo: '422',
-        mensagem: 'Ciclista já possui um aluguel em andamento'
+        mensagem: 'Ciclista já possui um aluguel em andamento',
+        email: ciclista.email,
+        ciclistaId: ciclista.id
       });
     }
 
@@ -226,7 +230,7 @@ const permiteAluguel = async (request, reply) => {
       });
     }
 
-    return reply.status(200).send("Escolha uma bike para alugar.");
+    return reply.status(200).send({mensagem: "Escolha uma bike para alugar.", ciclista});
 
   } catch (error) {
     console.error(error);
@@ -234,102 +238,74 @@ const permiteAluguel = async (request, reply) => {
   }
 };
 
-//reformular
 const getBicicletaAlugada = async (request, reply) => {
-try {
-  const { id } = request.params;
-  const ciclista = ciclistas.find(c => c.id === id);
+  try {
+    const ciclistaId = request.params.id;
+    const ciclista = ciclistas.find(c => c.id === ciclistaId);
+    if(ciclista === undefined){
+      return reply.status(404).send('Ciclista não encontrado');
+    }
+    const aluguelDoCiclista = alugueis.find(c => c.ciclista === ciclistaId);
 
-  const bicicleta = {
-    "id": 0,
-    "marca": "string",
-    "modelo": "string",
-    "ano": "string",
-    "numero": 0,
-    "status": "string"
-  };
+    if(aluguelDoCiclista === undefined){
+      return reply.status(404).send('Ciclista sem aluguel em andamento');
+    }
 
-  if (!ciclista) {
-    return reply.status(404).send('Ciclista não encontrado');
+    const bicicletas = await getBicicletaApi.getBicicleta();
+
+    const bicicleta = bicicletas.find(b => b.numero === parseInt(aluguelDoCiclista.numeroBicicleta));
+
+    const response = {
+      message: "Biblicleta alugada",
+      bicicleta
+    }
+
+    if (bicicleta.message === 'Bicicleta encontrada') {
+      return reply.status(200).send(response);
+    } else {
+      return reply.status(200).send({});
+    }
+  } catch (error) {
+    reply.code(500).send('Erro interno do servidor');
   }
-
-  if (ciclista.statusAluguel === true) {
-    return reply.status(200).send("Biblicleta alugada" + JSON.stringify(bicicleta)); 
-  } else {
-    return reply.status(200).send(null);
-  }
-} catch (error) {
-  reply.code(500).send('Erro interno do servidor');
-}
 }
 
 const postAluguel = async (request, reply) => {
-  
+
   try {
-
+    const numeroTranca = request.body.trancaInicio;
     const ciclistaId = request.body.ciclista;
-    const ciclista = ciclistas.find(c => c.id === ciclistaId);
 
-    if (!ciclista) {
-      return reply.status(404).send('Ciclista não encontrado');
-    }
-    if (ciclista.ativo === false) {
-      return reply.status(422).send({
-        codigo: '422', mensagem: 'Ciclista inativo. Ative sua conta.'
-      });
-    }
-    if (ciclista.statusAluguel === true) { // Enviar email com dados do aluguel em andamento
-      const aluguel = alugueis.find(a => a.ciclista === ciclista.id);
-      await enviarEmailApi.enviarEmail(ciclista.email, "Bicicletário System",  "Aluguel em andamento \n" + JSON.stringify(aluguel));
+    const permiteAluguel = await permiteAluguelApi.getPermiteAluguel(ciclistaId);
+
+    if (permiteAluguel.mensagem === 'Ciclista já possui um aluguel em andamento') { // Enviar email com dados do aluguel em andamento
+      const aluguel = alugueis.find(a => a.ciclista === permiteAluguel.ciclistaId);
+      await enviarEmailApi.enviarEmail(permiteAluguel.email, "Bicicletário System",  "Aluguel em andamento \n" + JSON.stringify(aluguel));
       return reply.status(422).send('Ciclista já possui um aluguel em andamento.');
     }
 
-    //Futura busca em trancas get /tranca
-    /*
-    const tranca = {
-      id: 0,
-      bicicleta: 123,
-      numero: 1,
-      localizacao: "string",
-      anoDeFabricacao: "string",
-      modelo: "string",
-      status: "ocupada"
-    };
-    if (!tranca || tranca.status !== "ocupada") {
-      return reply.status(422).send('Número da tranca inválido');
-    }
-    */
     const resultadoTranca = await getTrancaApi.getTranca();
-    if (resultadoTranca.status !== 200) {
-      return reply.status(resultadoTranca.status).send(resultadoTranca.data + ". Número da tranca inválido");
-    } 
+    const tranca = resultadoTranca.find(t => t.numero === parseInt(numeroTranca))
+    if (tranca === undefined) {
+      return reply.status(404).send(JSON.stringify(tranca) + ". Número da tranca inválido");
+    }
 
-    //Futura busca em bicicletas get /bicicleta
-    /*
-    const bicicleta = {
-      id: 0,
-      marca: "string",
-      modelo: "string",
-      ano: "string",
-      numero: 0,
-      status: "disponivel"
-    };
-    if (!bicicleta || tranca.bicicleta === 0) {
+    if(tranca.bicicleta === 0){
       return reply.status(404).send('Não existe bicicleta na tranca');
     }
-    if (bicicleta.status === 'em reparo') {
+
+    const resultadoBicicleta = await getBicicletaApi.getBicicleta();
+    const bicicleta = resultadoBicicleta.find(b => b.id === parseInt(tranca.bicicleta));
+
+    if (bicicleta.status === 'EM_REPARO') {
       return reply.status(404).send('Bicicleta em reparo');
     }
-    */
-    const resultadoBicicleta = await getBicicletaApi.getBicicleta();
-    if (resultadoBicicleta.status !== 200) {
-      return reply.status(resultadoBicicleta.status).send(resultadoBicicleta.data + ". Não existe bicicleta na tranca");
-    } 
 
     //cobranca
-    const confirmacaoPagamento = await realizarCobranca(10, ciclistaId);
-    if(confirmacaoPagamento.status !== 200) {
-      await incluirCobrancaNaFila(10, ciclistaId);
+    const confirmacaoPagamento = await cobrancaApi.cobranca(10, ciclistaId);
+
+    if(confirmacaoPagamento.status !== "PAGA") {
+      await filaCobrancaApi.filaCobranca(10, ciclistaId);
       return reply.status(404).send('Pagamento não autorizado');
     }
 
@@ -338,19 +314,24 @@ const postAluguel = async (request, reply) => {
       "dataHoraDevolucao": "",
       "numeroTranca": tranca.numero,
       "numeroBicicleta": bicicleta.numero,
-      "cartaoCobranca": ciclista.meioDePagamento.numero,
-      "ciclista": ciclista.id,
+      "cartaoCobranca": permiteAluguel.ciclista.meioDePagamento.numero,
+      "ciclista": permiteAluguel.ciclista.id,
       "valorAluguel": 10,
     };
     alugueis.push(aluguel);
     console.log("@@@@@@@@@@  ALUGUEIS  @@@@@@@@@2", alugueis);
 
-    const respostaTranca = await alterarStatusTranca(tranca.id, "DESTRANCAR");
-    if(respostaTranca.status !== 200) {
+    const respostaTranca = await trancaStatusApi.destrancarTranca(tranca.id, bicicleta.id, "LIVRE");
+    if(respostaTranca.message !== 'Dados atualizados') {
       return reply.status(422).send("Tranca não responde");
     }
 
-    await enviarEmailApi.enviarEmail(ciclista.email, "Bicicletário System", "Aluguel solicitado \n" + JSON.stringify(aluguel));
+    const respostaBicicleta = await bicicletaStatusApi.bicicletaStatus(bicicleta.id, "EM_USO");
+    if(respostaBicicleta.message !== 'Dados atualizados') {
+      return reply.status(422).send("Erro ao atualizar status da bicicleta");
+    }
+
+    await enviarEmailApi.enviarEmail(permiteAluguel.ciclista.email, "Bicicletário System", "Aluguel solicitado \n" + JSON.stringify(aluguel));
 
     return reply.status(200).send('Aluguel solicitado com sucesso' );
   } catch (error) {

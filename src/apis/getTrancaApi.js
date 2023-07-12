@@ -5,15 +5,15 @@ const log = require('../utils/logUtils');
 
 const getTranca = async () => {
     console.log("Chamando função getTranca");
-    return axios.get(`https://gentle-bracelet-wasp.cyclic.app/tranca/${idTranca}`)
+    return axios.get(`https://gentle-bracelet-wasp.cyclic.app/tranca`)
         .then(response  => {
-            log.info('Requisição retornada com sucesso');
-            console.log("@@@@@#@@ response ", response);
-            return response;
+            log.info('Requisição de tranca retornada com sucesso');
+            console.log("@@@@@#@@ response ", response.data);
+            return response.data;
         }).catch(err => {
             log.error('Falha no requisição lista de trancas');
-            console.log("@@@@@@@@ error", err.response);
-            return err.response;
+            console.log("@@@@@@@@ error", err.response.data);
+            return err.response.data;
         })
 }
 
