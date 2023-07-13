@@ -10,12 +10,10 @@ const getBicicletaApi = require ('../apis/getBicicletaApi.js')
 const getTrancaApi = require ('../apis/getTrancaApi.js')
 const bicicletaStatusApi = require ('../apis/bicicletaStatusApi.js')
 const trancaStatusApi = require ('../apis/trancaStatusApi.js')
-const moment = require('moment');
-const {getPermiteAluguel} = require("../apis/permiteAluguelApi");
 const permiteAluguelApi = require("../apis/permiteAluguelApi");
 const getEmailApi = require("../apis/getEmailApi");
+const moment = require('moment');
 
-// dados mock aux
 let alugueis = [{
   "dataHoraRetirada": new Date().toISOString(),
   "dataHoraDevolucao": "",
