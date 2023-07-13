@@ -56,13 +56,6 @@ const criarCiclista = async (request, reply) => {
     novoCiclista.ativo = false; //STATUS ATIVO INATIVO OU ESPERANDO CONFIRMAÇÃO
     novoCiclista.statusAluguel = false;
 
-    /*
-    const resultadoVerificacaoEmail = await validacoes.verificarEmail(novoCiclista.email);
-    //console.log("Email Resultado Verificacao Ciclista: "+resultadoVerificacaoEmail.success)
-    if (!resultadoVerificacaoEmail.success) {
-      return reply.status(resultadoVerificacaoEmail.status).send(resultadoVerificacaoEmail.message);
-    }
-    */
     const verificaEmail = await getEmailApi.getEmail(novoCiclista.email);
     if (verificaEmail.message !== 'E-mail disponível.') {
       return reply.status(verificaEmail.status).send(verificaEmail.message);
@@ -151,6 +144,11 @@ const atualizarCiclista = async(request, reply) => {
     if ( (dadosAtualizados.nacionalidade === 'BR' && (!dadosAtualizados.cpf || dadosAtualizados.cpf.length !== 11)) || 
         (!dadosAtualizados.passaporte?.numero || !dadosAtualizados.passaporte?.pais)) {
       return reply.status(422).send('Dados inválidos. Preencha todos os campos obrigatórios corretamente.');
+    }
+
+    const verificaEmail = await getEmailApi.getEmail(dadosAtualizados.email);
+    if (verificaEmail.message !== 'E-mail disponível.') {
+      return reply.status(verificaEmail.status).send(verificaEmail.message);
     }
 
     if (dadosAtualizados.senha !== dadosAtualizados.confirmarSenha) {
