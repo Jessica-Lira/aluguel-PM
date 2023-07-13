@@ -13,6 +13,7 @@ const trancaStatusApi = require ('../apis/trancaStatusApi.js')
 const moment = require('moment');
 const {getPermiteAluguel} = require("../apis/permiteAluguelApi");
 const permiteAluguelApi = require("../apis/permiteAluguelApi");
+const getEmailApi = require("../apis/getEmailApi");
 
 // dados mock aux
 let alugueis = [{
@@ -55,10 +56,16 @@ const criarCiclista = async (request, reply) => {
     novoCiclista.ativo = false; //STATUS ATIVO INATIVO OU ESPERANDO CONFIRMAÇÃO
     novoCiclista.statusAluguel = false;
 
+    /*
     const resultadoVerificacaoEmail = await validacoes.verificarEmail(novoCiclista.email);
     //console.log("Email Resultado Verificacao Ciclista: "+resultadoVerificacaoEmail.success)
     if (!resultadoVerificacaoEmail.success) {
       return reply.status(resultadoVerificacaoEmail.status).send(resultadoVerificacaoEmail.message);
+    }
+    */
+    const verificaEmail = await getEmailApi.getEmail(novoCiclista.email);
+    if (verificaEmail.message !== 'E-mail disponível.') {
+      return reply.status(verificaEmail.status).send(verificaEmail.message);
     }
 
     const camposObrigatorios = ['email', 'nacionalidade', 'nascimento', 'nome', 'senha', 'confirmarSenha', 'meioDePagamento'];
@@ -165,9 +172,9 @@ const atualizarCiclista = async(request, reply) => {
   }
 };
 
-//rever, falta x-id-requisicao
 const ativarCadastroCiclista = async (request, reply) => {
   try {
+    const requestId = uuidv4(); // x-id-requisicao
     const { id } = request.params;
     const ciclista = ciclistas.find(c => c.id === id);
 
@@ -372,6 +379,7 @@ const postDevolucao = async (request, reply) => {
     console.log("@@@@@@@@  DEVOLUÇÃO ALUGUEL @@@@@@", devolucoesAlugueis)
 
     await alterarStatusTranca(idTranca, "TRANCAR");
+    
     await enviarEmailApi.enviarEmail(ciclista.email, "Bicicletário System", "Devolução da bicicleta bem sucedida. " + JSON.stringify(aluguel))
     console.log("$$$$  ALUGUEL   $$$", aluguel);
 
@@ -416,14 +424,14 @@ const getExisteEmail = async (request, reply) => {
       return reply.status(200).send({
         success: true,
         status: 200,
-        //message: 'E-mail já está em uso por outro ciclista. Escolha um e-mail diferente.',
+        message: 'E-mail já está em uso por outro ciclista. Escolha um e-mail diferente.',
         emailExists: true,
       });
     } else {
       return reply.status(200).send({
         success: true,
         status: 200,
-        //message: 'E-mail disponível.',
+        message: 'E-mail disponível.',
         emailExists: false,
       });
     }
