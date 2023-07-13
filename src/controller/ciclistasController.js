@@ -34,19 +34,6 @@ let devolucoesAlugueis = [{
   "ciclista": 0
 }];
 
-/*
-let bicicletas = [
-  {
-    id: "1",
-    marca: "string",
-    modelo: "string",
-    ano: "string",
-    numero: "123",
-    status: "indisponivel"
-  }
-];
-*/
-
 const getCiclistas = async (request, reply) => { //metodo aux , nao tem cdu
   try {
     return reply.status(200).send(ciclistas);
@@ -321,8 +308,8 @@ const postAluguel = async (request, reply) => {
     alugueis.push(aluguel);
     console.log("@@@@@@@@@@  ALUGUEIS  @@@@@@@@@2", alugueis);
 
-    const respostaTranca = await trancaStatusApi.destrancarTranca(tranca.id, bicicleta.id, "LIVRE");
-    if(respostaTranca.message !== 'Dados atualizados') {
+    const respostaTranca = await trancaStatusApi.destrancarTranca(tranca.id, bicicleta.id);
+    if(respostaTranca !== 200) {
       return reply.status(422).send("Tranca não responde");
     }
 
@@ -518,7 +505,7 @@ const getDadosCiclista = (ciclista) => {
   };
 };
 
-//ubstituir
+/*
 const alterarStatusTranca = async (idTranca, acao) => {
   //CHAMAR O ENDPOINT DO JAO ///POST tranca/{idTranca}/status/{acao} ////////////acao = DESTRANCAR OU TRANCAR
   const message = {
@@ -565,7 +552,7 @@ const incluirCobrancaNaFila = async (valor, ciclistaId) => {
   //CHAMAR ENDPOINT MARIANA /filaCobranca
   return {status: 200, message:"IGUAL DO REALIZAR COBRANCA"};
 }
-
+*/
 function calcularDiferencaEValor(dataHoraRetirada, dataHoraDevolucao) {
   const diferenca = moment(dataHoraDevolucao).diff(moment(dataHoraRetirada), 'hours');
   console.log("#################diferenca#############3", diferenca);
