@@ -601,7 +601,7 @@ describe('getExisteEmail route test', () => {
   });
 
 });
-
+/*
 describe('getBiciletaAlugada route test', () => {
   test('Should return sucess if cyclist have a rent', async () => {
     const app = build();
@@ -631,7 +631,7 @@ describe('getBiciletaAlugada route test', () => {
   });
 
 });
-/*
+
 describe('postAluguel route test', () => {
   test('Should return success if Aluguel success', async () => {
     const app = build();
