@@ -285,7 +285,7 @@ const postAluguel = async (request, reply) => {
     }
 
     const resultadoBicicleta = await getBicicletaApi.getBicicleta();
-    const bicicleta = resultadoBicicleta.find(b => b.id === parseInt(tranca.bicicleta));
+    const bicicleta = resultadoBicicleta.find(b => b.numero === parseInt(tranca.bicicleta));
 
     if (bicicleta.status === 'EM_REPARO') {
       return reply.status(404).send('Bicicleta em reparo');
