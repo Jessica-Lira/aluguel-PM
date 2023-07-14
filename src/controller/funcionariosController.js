@@ -179,7 +179,7 @@ function getDadosFuncionario(funcionario){
     matricula: funcionario.matricula,
     senha: funcionario.senha,
     confirmacaoSenha: funcionario.confirmacaoSenha,
-    email: funcionario.confirmacaoSenha,
+    email: funcionario.email,
     nome: funcionario.nome,
     idade: funcionario.idade,
     funcao: funcionario.funcao,
