@@ -18,7 +18,7 @@ let alugueis = [{
   "dataHoraRetirada": new Date().toISOString(),
   "dataHoraDevolucao": "",
   "numeroTranca": "123",
-  "numeroBicicleta": "2000",
+  "numeroBicicleta": 2000,
   "cartaoCobranca": "984602367621417541873846007875805616119812247741040998629140438970271355",
   "ciclista": "2",
   "valorAluguel": "10",
@@ -293,7 +293,6 @@ const postAluguel = async (request, reply) => {
 
     //cobranca
     const confirmacaoPagamento = await cobrancaApi.cobranca(10, ciclistaId);
-
     if(confirmacaoPagamento.status !== "PAGA") {
       await filaCobrancaApi.filaCobranca(10, ciclistaId);
       return reply.status(404).send('Pagamento não autorizado');
@@ -333,29 +332,29 @@ const postAluguel = async (request, reply) => {
 const postDevolucao = async (request, reply) => {
   console.log("CHAMANDO POST DEVOLUÇÃO");
   try {
-    const { idTranca, idBicicleta } = request.body;
-    const solicitouReparo = false;
-    //Futura busca em bicicletas get /bicicleta
-    const bicicleta = bicicletas.find(b => b.id === idBicicleta);
-    if(!bicicleta){
+    const { idTranca, idBicicleta, solicitouReparo } = request.body;
+
+    const resultadoBicicleta = await getBicicletaApi.getBicicleta();
+    const bicicleta = resultadoBicicleta.find(b => b.id === parseInt(idBicicleta));
+    if(bicicleta === undefined) {
       return reply.status(422).send("Número da bicicleta inválido");
     }
 
     const aluguel = alugueis.find(a => a.numeroBicicleta === bicicleta.numero);
+    console.log("!!!!!!!!aluguel", aluguel);
     const ciclista = ciclistas.find(c => c.id === aluguel.ciclista);
 
     const dataHoraDevolucao = new Date().toISOString();
 
     const temCobrancaExtra = calcularDiferencaEValor("2023-06-29T00:22:54.485Z", "2023-06-29T03:52:54.485Z");
     console.log("$@342342342342342342342342342342342", temCobrancaExtra)
+
     if(temCobrancaExtra !== 0){
-      realizarCobranca(temCobrancaExtra, ciclista.id)
-          .then(response => {
-            console.log("Cobrança efetuada com sucesso", response.data);
-          }).catch( async err => {
-        console.log("Erro na tentativa de cobrança. Cobrança enviada para fila.");
-        await incluirCobrancaNaFila(temCobrancaExtra, ciclista.id);
-      });
+      const realizarCobranca = await cobrancaApi.cobranca(temCobrancaExtra, ciclista.id);
+      if(realizarCobranca.status !== 200) {
+        await filaCobrancaApi.filaCobranca(temCobrancaExtra, ciclista.id);
+        return reply.status(422).send("Erro na tentativa de cobrança. Cobrança enviada para fila.");
+      }
     }
 
     alugueis = alugueis.filter(a => a.ciclista !== ciclista.id);
@@ -374,16 +373,18 @@ const postDevolucao = async (request, reply) => {
     devolucoesAlugueis.push(devolucao);
     console.log("@@@@@@@@  DEVOLUÇÃO ALUGUEL @@@@@@", devolucoesAlugueis)
 
-    await alterarStatusTranca(idTranca, "TRANCAR");
+    const respostaTranca = await trancaStatusApi.trancarTranca(idTranca, idBicicleta);
+    if(respostaTranca.status !== 200) {
+      return reply.status(422).send("Não encontrado");
+    }
     
     await enviarEmailApi.enviarEmail(ciclista.email, "Bicicletário System", "Devolução da bicicleta bem sucedida. " + JSON.stringify(aluguel))
     console.log("$$$$  ALUGUEL   $$$", aluguel);
 
-    if(solicitouReparo){
-      await alterarStatusBicicleta(idBicicleta, "REPARO_SOLICITADO");
+    if(solicitouReparo === true) {
+      await bicicletaStatusApi.bicicletaStatus(idBicicleta, "REPARO_SOLICITADO");
       return reply.status(200).send('Bicicleta foi devolvida e será reparada');
     }
-    await alterarStatusBicicleta(idBicicleta, "DISPONIVEL");
 
     return reply.status(200).send('Bicicleta devolvida com sucesso '  + JSON.stringify(aluguel));
   } catch (error) {

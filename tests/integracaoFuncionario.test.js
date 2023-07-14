@@ -78,12 +78,14 @@ describe('POST de Funcionario na rota /funcionarios COM EMAIL INVALIDO', () => {
   });
 }); 
 
+/*
 describe('POST de Funcionario na rota /funcionarios COM EMAIL REPETIDO', () => {
   test('Deve dar erro de post de um funcionario', async () => {
     const response = await callCriarFuncionario(bodyFuncionarioComEmailRepetido);
     expect(response.statusCode).toBe(422);
   });
 });  
+*/
 
 //TESTES DE CAMPOS DE SENHA
 

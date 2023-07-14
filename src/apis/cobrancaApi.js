@@ -9,12 +9,12 @@ const cobranca = async (valor, ciclista) => {
     return axios.post('https://gentle-bee-shrug.cyclic.app/cobranca', body)
         .then(response  => {
             log.info('Pedido de cobranca realizado');
-            console.log("@@@@@#@@ response ", response.data);
-            return response.data;
+            console.log("@@@@@#@@ response ", response);
+            return response;
         }).catch(err => {
             log.error('Falha no pedido de cobranca');
-            console.log("@@@@@@@@ error", err.response.data);
-            return err.response.data;
+            console.log("@@@@@@@@ error", err.response);
+            return err.response;
         })
 }
 

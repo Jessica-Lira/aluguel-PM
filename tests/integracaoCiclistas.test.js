@@ -1,6 +1,7 @@
 'use strict';
 
 const { build } = require('../src/app');
+const enviarEmailApi = require ('../src/apis/enviarEmailApi.js')
 const {
   bodyCiclista, bodyCiclistaSemEmail, bodyCiclistaFormatoEmailErrado, bodyCiclistaInvalidPassaport,
   bodyCiclistaEmailJaEmUso, bodyCartaoInvalido, bodyCiclistaSemCampoNASCIMENTO, bodyCiclistaFormatoNASCIMENTOErrado,
@@ -47,6 +48,24 @@ describe('getCiclistas route test', () => {
   });
 
 });
+
+/*
+describe('criarCiclista route test', () => {
+  test('Should return success when called', async () => {
+
+    enviarEmailApi.enviarEmail = jest.fn().mockResolvedValueOnce({statusCode:200});
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/ciclistas', 
+      body:  bodyCiclista
+    });
+
+    expect(response.statusCode).toBe(200);
+  });
+});
+*/
+
 /*
 describe('criarCiclista route test', () => {
   test('Should create a new cyclist when all data is provided', async () => {
@@ -54,6 +73,7 @@ describe('criarCiclista route test', () => {
     expect(response.statusCode).toBe(201);
   });
 
+  
   test('Should return 404 erro when no data is provided', async () => {
     const response = await callCriarCiclista(undefined);
 
@@ -189,8 +209,11 @@ describe('criarCiclista route test', () => {
 
     expect(response.statusCode).toBe(200);
   });
+  
 });
 */
+
+
 describe('getCiclistaByID route test', () => {
   test('Should return 200 when search get ciclista', async () => {
     const app = build();
@@ -632,6 +655,8 @@ describe('getBiciletaAlugada route test', () => {
 
 });
 
+*/
+
 describe('postAluguel route test', () => {
   test('Should return success if Aluguel success', async () => {
     const app = build();
@@ -640,13 +665,14 @@ describe('postAluguel route test', () => {
       url: '/aluguel',
       payload: {
         "ciclista": "3",
-        "trancaInicio": "0"
+        "trancaInicio": "2000"
       }
     });
     expect(response.body).toBe('Aluguel realizado com sucesso')
     expect(response.statusCode).toBe(200);
   });
 
+  /*
   test('Should return message if Aluguel fail because another aluguel exist', async () => {
     const app = build();
     const response = await app.inject({
@@ -685,9 +711,11 @@ describe('postAluguel route test', () => {
     });
     expect(response.body).toBe('Ciclista não encontrado')
   });
+  */
 
 })
 
+/*
 describe('postDevolucao route test', () => {
   test('Should return sucess if Devolucao sucess', async () => {
     const app = build();

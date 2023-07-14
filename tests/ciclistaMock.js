@@ -1,28 +1,29 @@
 'use strict'
 
 const bodyCiclista = {
-    id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a5',
-    nome: 'Paulo',
-    nascimento: '2023-06-11',
-    cpf: '12345678955',
-    passaporte: {
-        numero: '123456789',
-        validade: '2023-06-11',
-        pais: 'TL'
+    "id": "9",
+    "nome": "Paulo",
+    "nascimento": "2023-06-11",
+    "cpf": "1111111111",
+    "passaporte": {
+      "numero": "string",
+      "validade": "2023-06-11",
+      "pais": "pt"
     },
-    nacionalidade: 'BR',
-    email: 'paulo@email.com',
-    urlFotoDocumento: 'string',
-    senha: 'clientepaulo',
-    confirmarSenha: 'clientepaulo',
-    meioDePagamento: {
-        nomeTitular: 'Paulo',
-        numero: '1234512345123456',
-        validade: '2023-11',
-        cvv: '487'
+    "nacionalidade": "PT",
+    "email": "contatojlira@gmail.com",
+    "urlFotoDocumento": "string",
+    "senha": "string",
+    "confirmarSenha": "string",
+    "meioDePagamento": {
+      "nomeTitular": "ana",
+      "numero": "4242424242424242",
+      "validade": "2024-05",
+      "cvv": "305"
     },
-    ativo: false,
-}
+    "ativo": false,
+    "statusAluguel": false
+  }
 
 const bodyCiclistaSemEmail = {
     id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',

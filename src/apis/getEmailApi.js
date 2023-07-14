@@ -3,7 +3,7 @@
 const axios = require('axios');
 const log = require('../utils/logUtils');
 
-const getEmail= async (email) => {
+const getEmail = async (email) => {
     console.log("Chamando função getEmail");
     return axios.get(`https://sore-jade-clownfish-veil.cyclic.app/ciclistas/existeEmail/${email}`)
         .then(response  => {
