@@ -4,7 +4,7 @@ let funcionarios = [
         matricula: "mat1",
         senha: "senhafuncionario1",
         confirmacaoSenha: "senhafuncionario1",
-        email: "funcionario1@example.com",
+        email: "joaoprf2001@gmail.com",
         nome: "funcionario1",
         idade: 0,
         funcao: "funcionario",
