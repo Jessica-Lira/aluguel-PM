@@ -1,7 +1,6 @@
 'use strict';
 
 const { build } = require('../src/app');
-const enviarEmailApi = require ('../src/apis/enviarEmailApi.js')
 const {
   bodyCiclista, bodyCiclistaSemEmail, bodyCiclistaFormatoEmailErrado, bodyCiclistaInvalidPassaport,
   bodyCiclistaEmailJaEmUso, bodyCartaoInvalido, bodyCiclistaSemCampoNASCIMENTO, bodyCiclistaFormatoNASCIMENTOErrado,
@@ -12,9 +11,8 @@ const {
   bodyCiclistaNonBrazilianWithPassport,
 } = require("./ciclistaMock");
 const app = build();
-
 const axios = require('axios');
-jest.mock('axios');
+const { criarCiclista } = require('../src/controller/ciclistasController.js');
 
 const callCriarCiclista = async (body) => {
   return await app.inject({
@@ -45,6 +43,52 @@ describe('getCiclistas route test', () => {
     });
 
     expect(response.statusCode).toBe(404);
+  });
+
+});
+
+describe('criarCiclista route', () => {
+  
+  test('deve criar um novo ciclista com sucesso', async () => {
+
+    const reply = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    const getEmailApi = require('../src/apis/getEmailApi.js');
+    const validaCartaoDeCreditoApi = require('../src/apis/validaCartaoDeCreditoApi.js');
+    const enviarEmailApi = require('../src/apis/enviarEmailApi.js');
+
+    getEmailApi.getEmail = jest.fn().mockResolvedValue({ data: { exists: true } });
+
+    validaCartaoDeCreditoApi.validaCartaoDeCredito = jest.fn().mockResolvedValue({ statusCode: 200, message: "ok" });
+    enviarEmailApi.enviarEmail = jest.fn().mockResolvedValue({});
+
+    await criarCiclista(bodyCiclista, reply);
+
+    expect(reply.status).toHaveBeenCalled();
+  });
+
+  test('deve lidar com falha na chamada da API getEmailApi', async () => {
+
+    const reply = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    const getEmailApi = require('../src/apis/getEmailApi.js');
+    const validaCartaoDeCreditoApi = require('../src/apis/validaCartaoDeCreditoApi.js');
+    const enviarEmailApi = require('../src/apis/enviarEmailApi.js');
+
+    getEmailApi.getEmail = jest.fn().mockRejectedValue(new Error('Falha na chamada da API getEmailApi'));
+    validaCartaoDeCreditoApi.validaCartaoDeCredito = jest.fn().mockResolvedValue({ statusCode: 200, message: "ok" });
+    enviarEmailApi.enviarEmail = jest.fn().mockResolvedValue({});
+
+    await criarCiclista(bodyCiclista, reply);
+
+    expect(reply.status).toHaveBeenCalledWith(404);
+    expect(reply.send).toHaveBeenCalledWith('Requisição mal formada. Dados não fornecidos.');
   });
 
 });
