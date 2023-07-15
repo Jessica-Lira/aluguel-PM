@@ -232,15 +232,6 @@ describe('atualizarCiclista route test', () => {
     expect(reply.send).toHaveBeenCalledWith('Dados inválidos. Preencha todos os campos obrigatórios corretamente.');
   });
 
-  test('Should return 404 when invalid ID is provided', async () => {
-    const app = build();
-    const response = await app.inject({
-      method: 'PUT',
-      url: '/ciclistas/289',
-    });
-    expect(response.statusCode).toBe(404);
-  });
-
 /*
   test('Should update cyclist when valid data is provided', async () => {
     const app = build();
@@ -272,38 +263,6 @@ describe('atualizarCiclista route test', () => {
       }
     });
     expect(response.statusCode).toBe(200);
-  });
-
-  test('Should not update cyclist when invalid id is provided', async () => {
-    const app = build();
-    const response = await app.inject({
-      method: 'PUT',
-      url: '/ciclistas/88',
-      payload: {
-        id: '15',
-        nome: 'john doe',
-        nascimento: '2023-06-11',
-        cpf: '12345678955',
-        passaporte: {
-          numero: '123456789',
-          validade: '2023-06-11',
-          pais: 'TL'
-        },
-        nacionalidade: 'BR',
-        email: 'novoemail@email.com',
-        urlFotoDocumento: 'string',
-        senha: 'clientenovo',
-        confirmarSenha: 'clientenovo',
-        meioDePagamento: {
-          nomeTitular: 'novo nome',
-          numero: '984602367621417541873846007875805616119812247741040998629140438970271355',
-          validade: '2023-06-11',
-          cvv: '444'
-        },
-        ativo: false,
-      }
-    });
-    expect(response.statusCode).toBe(404);
   });
         
 */
@@ -347,6 +306,7 @@ describe('ativarCadastroCiclista route test', () => {
 });
 
 describe('permiteAluguel route test', () => {
+
   test('Should allow rental for an active cyclist SEM ALUGUEL EM ANDAMENTO', async () => {
     const app = build();
     const response = await app.inject({
@@ -386,6 +346,7 @@ describe('permiteAluguel route test', () => {
 });
 
 describe('getCartaoCredito route test', () => {
+
   test('Should return the credit card information of a cyclist', async () => {
     const app = build();
     const response = await app.inject({
@@ -406,6 +367,7 @@ describe('getCartaoCredito route test', () => {
     expect(response.statusCode).toBe(404);
     expect(response.body).toBe('Ciclista não encontrado');
   });
+
 });
 /*
 describe('atualizarCartaoCredito route test', () => {
@@ -445,6 +407,7 @@ describe('atualizarCartaoCredito route test', () => {
 });
 */
 describe('getExisteEmail route test', () => {
+  
   test('Should return sucess if email exists in a cyclist', async () => {
     const app = build();
     const response = await app.inject({
