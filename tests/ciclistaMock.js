@@ -483,6 +483,30 @@ const bodyCiclistaBrazilianWithCPF = {
     ativo: false,
 }
 
+const bodyCiclistaBrazilianWithoutCPF = {
+  id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
+  nome: "Ciclista F",
+  nascimento: "2023-06-11",
+  cpf: "87",
+  passaporte: {
+    numero: "string",
+    validade: "2023-06-11",
+    pais: "TX"
+  },
+  nacionalidade: "BR",
+  email: "ciclistaf@example.com",
+  urlFotoDocumento: "string",
+  senha: "string",
+  confirmarSenha: "string",
+  meioDePagamento: {
+    nomeTitular: "ciclista E",
+    numero: "984602367621417541873846007875805616119812247741040998629140438970271356",
+    validade: "2023-11",
+    cvv: "455"
+  },
+  ativo: false,
+}
+
 const bodyCiclistaNonBrazilianWithPassport = {
     id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
     nome: "Ciclista F",
@@ -507,6 +531,30 @@ const bodyCiclistaNonBrazilianWithPassport = {
     ativo: false,
 }
 
+const bodyCiclistaNonBrazilianWithoutPassport = {
+  id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
+  nome: "Ciclista F",
+  nascimento: "2023-06-11",
+  cpf: "",
+  passaporte: {
+    numero: "",
+    validade: "",
+    pais: ""
+  },
+  nacionalidade: "US",
+  email: "ciclistaf@example.com",
+  urlFotoDocumento: "string",
+  senha: "string",
+  confirmarSenha: "string",
+  meioDePagamento: {
+    nomeTitular: "ciclista E",
+    numero: "984602367621417541873846007875805616119812247741040998629140438970271356",
+    validade: "2023-11",
+    cvv: "455"
+  },
+  ativo: false,
+}
+
 module.exports = {
     bodyCiclista,
     bodyCiclistaSemEmail,
@@ -528,5 +576,7 @@ module.exports = {
     bodyCiclistaSemCampoMEIODEPAGAMENTOSemCVV,
     bodyCiclistaUnmatchingPasswords,
     bodyCiclistaBrazilianWithCPF,
+    bodyCiclistaBrazilianWithoutCPF,
     bodyCiclistaNonBrazilianWithPassport,
+    bodyCiclistaNonBrazilianWithoutPassport
 }

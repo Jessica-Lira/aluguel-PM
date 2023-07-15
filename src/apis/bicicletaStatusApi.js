@@ -4,16 +4,16 @@ const axios = require('axios');
 const log = require('../utils/logUtils');
 
 const bicicletaStatus = async (idBicicleta, acao) => {
-    console.log("Chamando função alterar status bicicleta");
+   // console.log("Chamando função alterar status bicicleta");
     const body = {idBicicleta, acao}
     return axios.post(`https://gentle-bracelet-wasp.cyclic.app/bicicleta/${idBicicleta}/status/${acao}`, body)
         .then(response  => {
             log.info('Status da bicicleta alterado com sucesso');
-            console.log("@@@@@#@@ response ", response.data);
+    //        console.log("@@@@@#@@ response ", response.data);
             return response.data;
         }).catch(err => {
             log.error('Falha na requisição para alterar status bicicleta');
-            console.log("@@@@@@@@ error", err.response.data);
+    //        console.log("@@@@@@@@ error", err.response.data);
             return err.response.data;
         })
 }

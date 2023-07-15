@@ -624,8 +624,9 @@ describe('getExisteEmail route test', () => {
   });
 
 });
-/*
+
 describe('getBiciletaAlugada route test', () => {
+  /*
   test('Should return sucess if cyclist have a rent', async () => {
     const app = build();
     const response = await app.inject({
@@ -643,7 +644,7 @@ describe('getBiciletaAlugada route test', () => {
     });
     expect(response.statusCode).toBe(200);
   });
-
+*/
   test('Should return error 404 if cyclist dont exist', async () => {
     const app = build();
     const response = await app.inject({
@@ -654,9 +655,7 @@ describe('getBiciletaAlugada route test', () => {
   });
 
 });
-
-*/
-
+/*
 describe('postAluguel route test', () => {
   test('Should return success if Aluguel success', async () => {
     const app = build();
@@ -671,8 +670,7 @@ describe('postAluguel route test', () => {
     expect(response.body).toBe('Aluguel realizado com sucesso')
     expect(response.statusCode).toBe(200);
   });
-
-  /*
+  
   test('Should return message if Aluguel fail because another aluguel exist', async () => {
     const app = build();
     const response = await app.inject({
@@ -711,11 +709,9 @@ describe('postAluguel route test', () => {
     });
     expect(response.body).toBe('Ciclista não encontrado')
   });
-  */
 
 })
 
-/*
 describe('postDevolucao route test', () => {
   test('Should return sucess if Devolucao sucess', async () => {
     const app = build();

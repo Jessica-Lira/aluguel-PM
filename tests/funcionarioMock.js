@@ -57,7 +57,7 @@ const bodyFuncionarioComEmailInvalido = {
 const bodyFuncionarioComEmailRepetido = {
     senha: "senhafuncionario9",
     confirmacaoSenha: "senhafuncionario9",
-    email: "funcionario1@example.com",
+    email: "funcionario2@example.com",
     nome: "funcionario9",
     idade: 0,
     funcao: "funcionario",

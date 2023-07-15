@@ -510,54 +510,6 @@ const getDadosCiclista = (ciclista) => {
   };
 };
 
-/*
-const alterarStatusTranca = async (idTranca, acao) => {
-  //CHAMAR O ENDPOINT DO JAO ///POST tranca/{idTranca}/status/{acao} ////////////acao = DESTRANCAR OU TRANCAR
-  const message = {
-    "id": 0,
-    "bicicleta": 0,
-    "numero": 1,
-    "localizacao": "string",
-    "anoDeFabricacao": "string",
-    "modelo": "string",
-    "status": "string"
-  }
-
-  return {status: 200, message};
-}
-
-const alterarStatusBicicleta = async (idBicicleta, acao) => {
-  const message =
-  {
-    "id": idBicicleta,
-      "marca": "string",
-      "modelo": "string",
-      "ano": "string",
-      "numero": 0,
-      "status": "string"
-  }
-
-  return { status: 200, message }
-}
-
-const realizarCobranca = async (valor, ciclistaId) => {
-  //CHAMAR O ENDPOINT DA MARIANA
-  const message =     {
-        "id": "b46d0649-1a5c-4489-86d8-2a8434e9e4e4",
-        "status": "PAGA",
-        "horaSolicitacao": "2023-06-28T00:19:45.384Z",
-        "horaFinalizacao": "2023-06-28T00:19:48.146Z",
-        "valor": valor,
-        "ciclista": ciclistaId
-      };
-  return {status: 200, message};
-}
-
-const incluirCobrancaNaFila = async (valor, ciclistaId) => {
-  //CHAMAR ENDPOINT MARIANA /filaCobranca
-  return {status: 200, message:"IGUAL DO REALIZAR COBRANCA"};
-}
-*/
 function calcularDiferencaEValor(dataHoraRetirada, dataHoraDevolucao) {
   const diferenca = moment(dataHoraDevolucao).diff(moment(dataHoraRetirada), 'hours');
   console.log("#################diferenca#############3", diferenca);

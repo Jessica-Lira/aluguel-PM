@@ -82,7 +82,7 @@ function verificarCartaoCredito(cartao) {
   const { nomeTitular, numero, validade, cvv } = cartao;
 
   return (
-    (!nomeTitular || typeof nomeTitular === 'string') ||
+    (nomeTitular !== undefined || typeof nomeTitular === 'string') ||
     (!numero || numero.length === 16) ||
     (!validade || typeof validade === 'string') ||
     (!cvv || cvv.length === 3)
