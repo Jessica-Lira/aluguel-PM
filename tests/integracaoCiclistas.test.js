@@ -8,11 +8,14 @@ const {
   bodyCiclistaSemCampoMEIODEPAGAMENTOSemTudo, bodyCiclistaSemCampoMEIODEPAGAMENTOSemNome, bodyCiclistaFormatoMEIODEPAGAMENTOErrado,
   bodyCiclistaSemCampoMEIODEPAGAMENTOSemNumero, bodyCiclistaSemCampoMEIODEPAGAMENTOSemValidade,
   bodyCiclistaSemCampoMEIODEPAGAMENTOSemCVV, bodyCiclistaUnmatchingPasswords, bodyCiclistaBrazilianWithCPF,
-  bodyCiclistaNonBrazilianWithPassport,
+  bodyCiclistaNonBrazilianWithPassport, bodyDadosAtualizados
 } = require("./ciclistaMock");
 const app = build();
 const axios = require('axios');
-const { criarCiclista } = require('../src/controller/ciclistasController.js');
+const { criarCiclista, atualizarCiclista } = require('../src/controller/ciclistasController.js');
+const getEmailApi = require('../src/apis/getEmailApi.js');
+const validaCartaoDeCreditoApi = require('../src/apis/validaCartaoDeCreditoApi.js');
+const enviarEmailApi = require('../src/apis/enviarEmailApi.js');
 
 const callCriarCiclista = async (body) => {
   return await app.inject({
@@ -30,6 +33,7 @@ const callGetCiclistas = async () => {
 }
 
 describe('getCiclistas route test', () => {
+
   test('Should return the list of cyclists when called', async () => {
     const response = await callGetCiclistas();
 
@@ -47,7 +51,7 @@ describe('getCiclistas route test', () => {
 
 });
 
-describe('criarCiclista route', () => {
+describe('criarCiclista route test', () => {
   
   test('deve criar um novo ciclista com sucesso', async () => {
 
@@ -56,12 +60,7 @@ describe('criarCiclista route', () => {
       send: jest.fn(),
     };
 
-    const getEmailApi = require('../src/apis/getEmailApi.js');
-    const validaCartaoDeCreditoApi = require('../src/apis/validaCartaoDeCreditoApi.js');
-    const enviarEmailApi = require('../src/apis/enviarEmailApi.js');
-
     getEmailApi.getEmail = jest.fn().mockResolvedValue({ data: { exists: true } });
-
     validaCartaoDeCreditoApi.validaCartaoDeCredito = jest.fn().mockResolvedValue({ statusCode: 200, message: "ok" });
     enviarEmailApi.enviarEmail = jest.fn().mockResolvedValue({});
 
@@ -77,10 +76,6 @@ describe('criarCiclista route', () => {
       send: jest.fn(),
     };
 
-    const getEmailApi = require('../src/apis/getEmailApi.js');
-    const validaCartaoDeCreditoApi = require('../src/apis/validaCartaoDeCreditoApi.js');
-    const enviarEmailApi = require('../src/apis/enviarEmailApi.js');
-
     getEmailApi.getEmail = jest.fn().mockRejectedValue(new Error('Falha na chamada da API getEmailApi'));
     validaCartaoDeCreditoApi.validaCartaoDeCredito = jest.fn().mockResolvedValue({ statusCode: 200, message: "ok" });
     enviarEmailApi.enviarEmail = jest.fn().mockResolvedValue({});
@@ -91,174 +86,15 @@ describe('criarCiclista route', () => {
     expect(reply.send).toHaveBeenCalledWith('Requisição mal formada. Dados não fornecidos.');
   });
 
-});
-
-/*
-describe('criarCiclista route test', () => {
-  test('Should return success when called', async () => {
-
-    enviarEmailApi.enviarEmail = jest.fn().mockResolvedValueOnce({statusCode:200});
-
-    const response = await app.inject({
-      method: 'POST',
-      url: '/ciclistas', 
-      body:  bodyCiclista
-    });
-
-    expect(response.statusCode).toBe(200);
-  });
-});
-*/
-
-/*
-describe('criarCiclista route test', () => {
-  test('Should create a new cyclist when all data is provided', async () => {
-    const response = await callCriarCiclista(bodyCiclista);
-    expect(response.statusCode).toBe(201);
-  });
-
-  
   test('Should return 404 erro when no data is provided', async () => {
     const response = await callCriarCiclista(undefined);
-
     expect(response.statusCode).toBe(404);
   });
 
-  test('Should return 400 when without EMAIL', async () => {
-    const response = await callCriarCiclista(bodyCiclistaSemEmail);
-
-    expect(response.statusCode).toBe(400);
-  });
-
-  test('Should return 422 when wrong EMAIL format', async () => {
-    const response = await callCriarCiclista(bodyCiclistaFormatoEmailErrado);
-
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return 422 for non-Brazilian nationality with invalid passport', async () => {
-    const response = await callCriarCiclista(bodyCiclistaInvalidPassaport);
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return 422 for invalid credit card', async () => {
-    const response = await callCriarCiclista(bodyCartaoInvalido);
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return message when EMAIL is used by another cyclist', async () => {
-    const response = await callCriarCiclista(bodyCiclistaEmailJaEmUso);
-
-    expect(response.body).toBe('E-mail já está em uso por outro ciclista. Escolha um e-mail diferente.')
-    expect(response.statusCode).toBe(200);
-  });
-
-  test('Should return 422 when without NASCIMENTO', async () => {
-    const response = await callCriarCiclista(bodyCiclistaSemCampoNASCIMENTO);
-
-    expect(response.body).toBe('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.')
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return 422 when invalid NASCIMENTO format', async () => {
-    const response = await callCriarCiclista(bodyCiclistaFormatoNASCIMENTOErrado);
-
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return 422 when without NOME', async () => {
-    const response = await callCriarCiclista(bodyCiclistaSemCampoNOME);
-
-    expect(response.body).toBe('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.')
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return 422 when without NACIONALIDADE', async () => {
-    const response = await callCriarCiclista(bodyCiclistaSemCampoNACIONALIDADE);
-
-    expect(response.body).toBe('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.')
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return 422 when without SENHA', async () => {
-    const response = await callCriarCiclista(bodyCiclistaSemCampoSENHA);
-
-    expect(response.body).toBe('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.')
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return 422 when without CONFIRMARSENHA', async () => {
-    const response = await callCriarCiclista(bodyCiclistaSemCampoCONFIRMARSENHA);
-
-    expect(response.body).toBe('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.')
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return 422 when without MEIODEPAGAMENTO - all', async () => {
-    const response = await callCriarCiclista(bodyCiclistaSemCampoMEIODEPAGAMENTOSemTudo);
-
-    expect(response.body).toBe('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.')
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return 422 when without MEIODEPAGAMENTO - nome titular', async () => {
-    const response = await callCriarCiclista(bodyCiclistaSemCampoMEIODEPAGAMENTOSemNome);
-
-    expect(response.body).toBe('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.')
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return 422 when without MEIODEPAGAMENTO - numero', async () => {
-    const response = await callCriarCiclista(bodyCiclistaSemCampoMEIODEPAGAMENTOSemNumero);
-
-    expect(response.body).toBe('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.')
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return 422 when without MEIODEPAGAMENTO - validade', async () => {
-    const response = await callCriarCiclista(bodyCiclistaSemCampoMEIODEPAGAMENTOSemValidade);
-
-    expect(response.body).toBe('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.')
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return 422 invalid format MEIODEPAGAMENTO - validade', async () => {
-    const response = await callCriarCiclista(bodyCiclistaFormatoMEIODEPAGAMENTOErrado); 
-
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return 422 when without MEIODEPAGAMENTO - cvv', async () => {
-    const response = await callCriarCiclista(bodyCiclistaSemCampoMEIODEPAGAMENTOSemCVV);
-
-    expect(response.body).toBe('Dados inválidos. Preencha todos os campos obrigatórios e tente novamente.')
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return 422 for unmatching passwords', async () => {
-    const response = await callCriarCiclista(bodyCiclistaUnmatchingPasswords);
-
-    expect(response.body).toBe('Dados inválidos. A senha e a confirmação de senha devem ser iguais.')
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return success for Brazilian nationality with valid CPF', async () => {
-    const response = await callCriarCiclista(bodyCiclistaBrazilianWithCPF);
-
-    expect(response.statusCode).toBe(201);
-  });
-
-  test('Should return success for non-Brazilian nationality with valid passport', async () => {
-    const response = await callCriarCiclista(bodyCiclistaNonBrazilianWithPassport);
-
-    expect(response.statusCode).toBe(200);
-  });
-  
 });
-*/
-
 
 describe('getCiclistaByID route test', () => {
+
   test('Should return 200 when search get ciclista', async () => {
     const app = build();
 
@@ -295,9 +131,117 @@ describe('getCiclistaByID route test', () => {
 
     expect(response.statusCode).toBe(404);
   });
+
 });
-/*
+
 describe('atualizarCiclista route test', () => {
+/*
+  test('Should update cyclist when valid data is provided', async () => {
+    
+    const app = build();
+    const response = await app.inject({
+      method: 'PUT',
+      url: '/ciclistas/4',
+      payload: {
+        id: '777',
+        nome: 'Paulo',
+        nascimento: '2023-06-11',
+        cpf: '12345678955',
+        passaporte: {
+          numero: '123456789',
+          validade: '2023-06-11',
+          pais: 'TL'
+        },
+        nacionalidade: 'BR',
+        email: 'paulo@email.com',
+        urlFotoDocumento: 'string',
+        senha: 'clientepaulo',
+        confirmarSenha: 'clientepaulo',
+        meioDePagamento: {
+          nomeTitular: 'Paulo',
+          numero: '1234512345123456',
+          validade: '2023-06',
+          cvv: '487'
+        },
+        ativo: false,
+      }
+    });
+
+    getEmailApi.getEmail = jest.fn().mockResolvedValue({ data: { exists: true } });
+    validaCartaoDeCreditoApi.validaCartaoDeCredito = jest.fn().mockResolvedValue({ statusCode: 200, message: "ok" });
+    enviarEmailApi.enviarEmail = jest.fn().mockResolvedValue({});
+
+    await atualizarCiclista(response, reply);
+
+    expect(reply.status).toHaveBeenCalledWith(200);
+    //expect(response.statusCode).toBe(200);
+    
+  });
+  */
+
+  test('deve retornar 404 se o ciclista não for encontrado', async () => {
+    const request = {
+      params: {
+        id: 'ciclista-id-inexistente'
+      },
+      body: {}
+    };
+
+    const reply = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn()
+    };
+
+    await atualizarCiclista(request, reply);
+
+    expect(reply.status).toHaveBeenCalledWith(404);
+    expect(reply.send).toHaveBeenCalledWith('Ciclista não encontrado');
+  });
+
+  test('deve retornar 422 se os dados atualizados forem inválidos', async () => {
+    const ciclistas = [{
+      id: '4',
+      nacionalidade: 'BR',
+      cpf: '',
+      passaporte: {}
+    }];
+
+    const request = {
+      params: {
+        id: '4'
+      },
+      body: {
+        nacionalidade: 'BR',
+        cpf: '',
+        passaporte: {}
+      }
+    };
+
+    const reply = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn()
+    };
+
+    getEmailApi.getEmail = jest.fn().mockResolvedValue({ data: { exists: true } });
+    validaCartaoDeCreditoApi.validaCartaoDeCredito = jest.fn().mockResolvedValue({ statusCode: 200, message: "ok" });
+    enviarEmailApi.enviarEmail = jest.fn().mockResolvedValue({});
+
+    await atualizarCiclista(request, reply, ciclistas);
+
+    expect(reply.status).toHaveBeenCalledWith(422);
+    expect(reply.send).toHaveBeenCalledWith('Dados inválidos. Preencha todos os campos obrigatórios corretamente.');
+  });
+
+  test('Should return 404 when invalid ID is provided', async () => {
+    const app = build();
+    const response = await app.inject({
+      method: 'PUT',
+      url: '/ciclistas/289',
+    });
+    expect(response.statusCode).toBe(404);
+  });
+
+/*
   test('Should update cyclist when valid data is provided', async () => {
     const app = build();
     const response = await app.inject({
@@ -361,142 +305,12 @@ describe('atualizarCiclista route test', () => {
     });
     expect(response.statusCode).toBe(404);
   });
-
-  test('Should not update cyclist when without fields', async () => {
-    const app = build();
-    const response = await app.inject({
-      method: 'PUT',
-      url: '/ciclistas/2',
-      payload: {
-        id: '2',
-        nome: '',
-        nascimento: '',
-        cpf: '',
-        passaporte: {
-          numero: '123456789',
-          validade: '2023-06-11',
-          pais: 'TL'
-        },
-        nacionalidade: 'BR',
-        email: 'novoemail@email.com',
-        urlFotoDocumento: 'string',
-        senha: 'clientenovo',
-        confirmarSenha: 'clientenovo',
-        meioDePagamento: {
-          nomeTitular: 'novo nome',
-          numero: '984602367621417541873846007875805616119812247741040998629140438970271355',
-          validade: '2023-06-11',
-          cvv: '444'
-        },
-        ativo: false,
-      }
-    });
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should not update cyclist when invalid url is provided', async () => {
-    const app = build();
-
-    const response = await app.inject({
-      method: 'PUT',
-      url: '/ciclistas/0c4e5a5d-7',
-      payload: {
-        id: '0c4e5a5d',
-        nome: 'Novo nome',
-        nascimento: '2023-06-11',
-        cpf: '12345678955',
-        passaporte: {
-          numero: '123456789',
-          validade: '2023-06-11',
-          pais: 'TL'
-        },
-        nacionalidade: 'BR',
-        email: 'novoemail@email.com',
-        urlFotoDocumento: 'string',
-        senha: 'clientenovo',
-        confirmarSenha: 'clientenovo',
-        meioDePagamento: {
-          nomeTitular: 'novo nome',
-          numero: '984602367621417541873846007875805616119812247741040998629140438970271355',
-          validade: '2023-06-11',
-          cvv: '444'
-        },
-        ativo: false,
-      }
-    });
-
-    expect(response.statusCode).toBe(404);
-  });
-
-  test('Should return 422 for unmatching passwords', async () => {
-    const app = build();
-    const response = await app.inject({
-      method: 'PUT',
-      url: '/ciclistas/5',
-      payload: {
-        id: '0c4e5a5d-7b33-4d9a-9a8b-54c78b7a31a8',
-        nome: "Ciclista E",
-        nascimento: "2023-06-11",
-        cpf: "87942565301",
-        passaporte: {
-          numero: "string",
-          validade: "2023-06-11",
-          pais: "TX"
-        },
-        nacionalidade: "nacionalidade",
-        email: "ciclistae@example.com",
-        urlFotoDocumento: "string",
-        senha: "senha",
-        confirmarSenha: "outrasenha",
-        meioDePagamento: {
-          nomeTitular: "ciclista D",
-          numero: "984602367621417541873846007875805616119812247741040998629140438970271356",
-          validade: "2023-06-11",
-          cvv: "455"
-        },
-        ativo: false,
-      }
-    });
-    expect(response.statusCode).toBe(422);
-  });
-
-  test('Should return success for non Brazilian with valid passport', async () => {
-    const app = build();
-
-    const response = await app.inject({
-      method: 'PUT',
-      url: '/ciclistas/5',
-      payload: {
-        id: '5',
-        nome: "Ciclista F",
-        nascimento: "2023-06-11",
-        cpf: "",
-        passaporte: {
-          numero: "string",
-          validade: "2023-06-11",
-          pais: "TX"
-        },
-        nacionalidade: "PT",
-        email: "ciclistaf@example.com",
-        urlFotoDocumento: "string",
-        senha: "string",
-        confirmarSenha: "string",
-        meioDePagamento: {
-          nomeTitular: "ciclista E",
-          numero: "1234567812345678",
-          validade: "2023-06-11",
-          cvv: "455"
-        },
-        ativo: false,
-      }
-    });
-
-    expect(response.statusCode).toBe(200);
-  });
-
-});
+        
 */
+});
+
 describe('ativarCadastroCiclista route test', () => {
+
   test('Should activate a cyclist when valid ID is provided and cyclist is not active', async () => {
     const app = build();
     const response = await app.inject({

@@ -555,6 +555,31 @@ const bodyCiclistaNonBrazilianWithoutPassport = {
   ativo: false,
 }
 
+const bodyDadosAtualizados = {
+  id: '4',
+  nome: "Paulo",
+  nascimento: "2023-06-11",
+  cpf: "1111111111",
+  passaporte: {
+    numero: "string",
+    validade: "2023-06-11",
+    pais: "pt"
+  },
+  nacionalidade: "PT",
+  email: "unirio@gmail.com",
+  urlFotoDocumento: "string",
+  senha: "string",
+  confirmarSenha: "string",
+  meioDePagamento: {
+    nomeTitular: "ana",
+    numero: "12345672345678",
+    validade: "2023-11",
+    cvv: "858"
+  },
+ ativo: false,
+  statusAluguel: false
+}
+
 module.exports = {
     bodyCiclista,
     bodyCiclistaSemEmail,
@@ -578,5 +603,6 @@ module.exports = {
     bodyCiclistaBrazilianWithCPF,
     bodyCiclistaBrazilianWithoutCPF,
     bodyCiclistaNonBrazilianWithPassport,
-    bodyCiclistaNonBrazilianWithoutPassport
+    bodyCiclistaNonBrazilianWithoutPassport,
+    bodyDadosAtualizados
 }
