@@ -57,6 +57,64 @@ describe('getCiclistas route test', () => {
 describe('criarCiclista route test', () => {
   
   test('deve criar um novo ciclista com sucesso', async () => {
+    const app = build();
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/ciclistas',
+      payload: {
+        "id": "9",
+        "nome": "Paulo",
+        "nascimento": "2023-06-11",
+        "cpf": "1111111111",
+        "passaporte": {
+          "numero": "string",
+          "validade": "2023-06-11",
+          "pais": "pt"
+        },
+        "nacionalidade": "PT",
+        "email": "contatojlira@gmail.com",
+        "urlFotoDocumento": "string",
+        "senha": "string",
+        "confirmarSenha": "string",
+        "meioDePagamento": {
+          "nomeTitular": "ana",
+          "numero": "4242424242424242",
+          "validade": "2024-05",
+          "cvv": "305"
+        },
+        "ativo": false,
+        "statusAluguel": false
+      }
+    });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.json()).toEqual(expect.objectContaining({
+        "nome": "Paulo",
+        "nascimento": "2023-06-11",
+        "cpf": "1111111111",
+        "passaporte": {
+          "numero": "string",
+          "validade": "2023-06-11",
+          "pais": "pt"
+        },
+        "nacionalidade": "PT",
+        "email": "contatojlira@gmail.com",
+        "urlFotoDocumento": "string",
+        "senha": "string",
+        "confirmarSenha": "string",
+        "meioDePagamento": {
+          "nomeTitular": "ana",
+          "numero": "4242424242424242",
+          "validade": "2024-05",
+          "cvv": "305"
+        },
+        "ativo": false,
+        "statusAluguel": false
+    }));
+  });
+
+  test('deve criar um novo ciclista com sucesso', async () => {
 
     const reply = {
       status: jest.fn().mockReturnThis(),
@@ -374,8 +432,9 @@ describe('getCartaoCredito route test', () => {
   });
 
 });
-/*
+
 describe('atualizarCartaoCredito route test', () => {
+  /*
   test('Should update the credit card information of a cyclist', async () => {
     const app = build();
 
@@ -392,7 +451,7 @@ describe('atualizarCartaoCredito route test', () => {
 
     expect(response.statusCode).toBe(200);
   });
-
+*/
   test('Should return 404 if cyclist is not found', async () => {
     const app = build();
 
@@ -410,7 +469,7 @@ describe('atualizarCartaoCredito route test', () => {
     expect(response.statusCode).toBe(404);
   });
 });
-*/
+
 describe('getExisteEmail route test', () => {
   
   test('Should return sucess if email exists in a cyclist', async () => {

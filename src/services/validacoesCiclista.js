@@ -82,10 +82,10 @@ function verificarCartaoCredito(cartao) {
   const { nomeTitular, numero, validade, cvv } = cartao;
 
   return (
-    (nomeTitular !== undefined || typeof nomeTitular === 'string') ||
-    (!numero || numero.length === 16) ||
-    (!validade || typeof validade === 'string') ||
-    (!cvv || cvv.length === 3)
+    (nomeTitular !== undefined && typeof nomeTitular === 'string') &&
+    (numero !== undefined && numero.length === 16) &&
+    (validade !== undefined && typeof validade === 'string') &&
+    (cvv !== undefined && cvv.length === 3)
   );
 };
 

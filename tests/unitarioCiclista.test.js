@@ -92,10 +92,21 @@ test('deve retornar falha para nacionalidade estrangeira sem passaporte válido'
 test('deve retornar true para cartão de crédito válido', () => {
   const cartao = {
     nomeTitular: 'João Silva',
-    numero: '1234567890123456',
+    numero: '1234567812345678',
     validade: '2024/12',
-    cvv: '123',
+    cvv: '222',
   };
   const resultado = serviceValidacaoCiclista.verificarCartaoCredito(cartao);
   expect(resultado).toBe(true);
+});
+
+test('deve retornar false para cartão de crédito inválido', () => {
+  const cartao = {
+    nomeTitular: '',
+    numero: '',
+    validade: '',
+    cvv: '1',
+  };
+  const resultado = serviceValidacaoCiclista.verificarCartaoCredito(cartao);
+  expect(resultado).toBe(false);
 });
