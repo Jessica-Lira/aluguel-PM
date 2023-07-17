@@ -16,6 +16,9 @@ const { criarCiclista, atualizarCiclista } = require('../src/controller/ciclista
 const getEmailApi = require('../src/apis/getEmailApi.js');
 const validaCartaoDeCreditoApi = require('../src/apis/validaCartaoDeCreditoApi.js');
 const enviarEmailApi = require('../src/apis/enviarEmailApi.js');
+const getTrancaApi = require("../src/apis/getTrancaApi");
+const getBicicletaApi = require("../src/apis/getBicicletaApi");
+const cobrancaApi = require("../src/apis/cobrancaApi");
 
 const callCriarCiclista = async (body) => {
   return await app.inject({
@@ -325,22 +328,24 @@ describe('permiteAluguel route test', () => {
     expect(response.statusCode).toBe(404);
   });
 
-  test('Should return 422 for cyclist COM ALUGUEL EM ANDAMENTO', async () => {
+  test('Should return 200 for cyclist COM ALUGUEL EM ANDAMENTO', async () => {
     const app = build();
     const response = await app.inject({
       method: 'GET',
       url: '/ciclistas/2/permiteAluguel',
     });
-    expect(response.statusCode).toBe(422);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toContain('Ciclista já possui um aluguel em andamento');
   });
 
-  test('Should return 422 for cyclist COM CONTA INATIVA mesmo sem aluguel em andamento', async () => {
+  test('Should return 200 for cyclist COM CONTA INATIVA mesmo sem aluguel em andamento', async () => {
     const app = build();
     const response = await app.inject({
       method: 'GET',
       url: '/ciclistas/5/permiteAluguel',
     });
-    expect(response.statusCode).toBe(422);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toContain('Ciclista inativo. Ative sua conta.');
   });
 
 });
@@ -476,10 +481,23 @@ describe('getBiciletaAlugada route test', () => {
   });
 
 });
-/*
+
+  const bodyTranca = [{
+    "id": 1,
+    "localizacao": "Rua da tranca",
+    "modelo": "Tranca bem firme",
+    "numero": 2000,
+    "anoFabricacao": 2019,
+    "bicicleta": 2000,
+    "status": "NOVA"
+  }];
+
 describe('postAluguel route test', () => {
   test('Should return success if Aluguel success', async () => {
     const app = build();
+    //só está mockado pq a api do joao fica destrancada e a gnt precisa dela trancada
+    getTrancaApi.getTranca = jest.fn().mockResolvedValueOnce(bodyTranca);
+
     const response = await app.inject({
       method: 'POST',
       url: '/aluguel',
@@ -488,7 +506,7 @@ describe('postAluguel route test', () => {
         "trancaInicio": "2000"
       }
     });
-    expect(response.body).toBe('Aluguel realizado com sucesso')
+    expect(response.body).toBe('Aluguel solicitado com sucesso')
     expect(response.statusCode).toBe(200);
   });
   
@@ -502,7 +520,7 @@ describe('postAluguel route test', () => {
         "trancaInicio": "0"
       }
     });
-    expect(response.body).toBe('Ciclista já possui um aluguel em andamento')
+    expect(response.body).toBe('Ciclista já possui um aluguel em andamento.')
   });
 
   test('Should return message if Aluguel fail because cyclist is not active', async () => {
@@ -516,6 +534,7 @@ describe('postAluguel route test', () => {
       }
     });
     expect(response.statusCode).toBe(422);
+    expect(response.body).toBe('Ciclista inativo. Ative sua conta.');
   });
 
   test('Should return message if Aluguel fail because cyclist dont exist', async () => {
@@ -528,7 +547,8 @@ describe('postAluguel route test', () => {
         "trancaInicio": "0"
       }
     });
-    expect(response.body).toBe('Ciclista não encontrado')
+    expect(response.body).toBe('Ciclista não encontrado');
+    expect(response.statusCode).toBe(404);
   });
 
 })
@@ -540,12 +560,12 @@ describe('postDevolucao route test', () => {
       method: 'POST',
       url: '/devolucao',
       payload: {
-        "idTranca": 0,
+        "idTranca": 1,
         "idBicicleta": "1"
       }
     });
     expect(response.statusCode).toBe(200);
-  });  
+  });
 
   test('Should return 422 if Devolucao failed', async () => {
     const app = build();
@@ -558,6 +578,5 @@ describe('postDevolucao route test', () => {
       }
     });
     expect(response.statusCode).toBe(422);
-  });  
+  });
 })
-*/

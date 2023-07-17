@@ -205,8 +205,8 @@ const permiteAluguel = async (request, reply) => {
     }
 
     if (aluguel.verificarStatus(ciclista.statusAluguel) === true) {
-      return reply.status(422).send({
-        codigo: '422',
+      return reply.status(200).send({
+        permissao: false,
         mensagem: 'Ciclista já possui um aluguel em andamento',
         email: ciclista.email,
         ciclistaId: ciclista.id
@@ -214,13 +214,13 @@ const permiteAluguel = async (request, reply) => {
     }
 
     if (aluguel.verificarStatus(ciclista.ativo) === false) {
-      return reply.status(422).send({
-        codigo: '422',
+      return reply.status(200).send({
+        permissao: false,
         mensagem: 'Ciclista inativo. Ative sua conta.'
       });
     }
 
-    return reply.status(200).send({mensagem: "Escolha uma bike para alugar.", ciclista});
+    return reply.status(200).send({permissao: true, mensagem: "Escolha uma bike para alugar.", ciclista});
 
   } catch (error) {
     console.error(error);
@@ -268,6 +268,15 @@ const postAluguel = async (request, reply) => {
 
     const permiteAluguel = await permiteAluguelApi.getPermiteAluguel(ciclistaId);
 
+    if (permiteAluguel.mensagem === 'Ciclista não encontrado') {
+      return reply.status(404).send(permiteAluguel.mensagem);
+    }
+
+    if (permiteAluguel.mensagem === 'Ciclista inativo. Ative sua conta.') {
+      // return reply.status(422).send(JSON.stringify(permiteAluguel.mensagem));
+      return reply.status(422).send(permiteAluguel.mensagem);
+    }
+
     if (permiteAluguel.mensagem === 'Ciclista já possui um aluguel em andamento') { // Enviar email com dados do aluguel em andamento
       const aluguel = alugueis.find(a => a.ciclista === permiteAluguel.ciclistaId);
       await enviarEmailApi.enviarEmail(permiteAluguel.email, "Bicicletário System",  "Aluguel em andamento \n" + JSON.stringify(aluguel));
@@ -293,7 +302,7 @@ const postAluguel = async (request, reply) => {
 
     //cobranca
     const confirmacaoPagamento = await cobrancaApi.cobranca(10, ciclistaId);
-    if(confirmacaoPagamento.status !== "PAGA") {
+    if(confirmacaoPagamento.data.status !== "PAGA") {
       await filaCobrancaApi.filaCobranca(10, ciclistaId);
       return reply.status(404).send('Pagamento não autorizado');
     }
