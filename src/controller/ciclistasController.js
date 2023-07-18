@@ -238,7 +238,7 @@ const getBicicletaAlugada = async (request, reply) => {
     const aluguelDoCiclista = alugueis.find(c => c.ciclista === ciclistaId);
 
     if(aluguelDoCiclista === undefined){
-      return reply.status(404).send('Ciclista sem aluguel em andamento');
+      return reply.status(200).send('Ciclista sem aluguel em andamento');
     }
 
     const bicicletas = await getBicicletaApi.getBicicleta();
@@ -317,7 +317,6 @@ const postAluguel = async (request, reply) => {
       "valorAluguel": 10,
     };
     alugueis.push(aluguel);
-    console.log("@@@@@@@@@@  ALUGUEIS  @@@@@@@@@2", alugueis);
 
     const respostaTranca = await trancaStatusApi.destrancarTranca(tranca.id, bicicleta.id);
     if(respostaTranca !== 200) {
@@ -350,13 +349,11 @@ const postDevolucao = async (request, reply) => {
     }
 
     const aluguel = alugueis.find(a => a.numeroBicicleta === bicicleta.numero);
-    console.log("!!!!!!!!aluguel", aluguel);
     const ciclista = ciclistas.find(c => c.id === aluguel.ciclista);
 
     const dataHoraDevolucao = new Date().toISOString();
 
     const temCobrancaExtra = calcularDiferencaEValor("2023-06-29T00:22:54.485Z", "2023-06-29T03:52:54.485Z");
-    console.log("$@342342342342342342342342342342342", temCobrancaExtra)
 
     if(temCobrancaExtra !== 0){
       const realizarCobranca = await cobrancaApi.cobranca(temCobrancaExtra, ciclista.id);
@@ -380,15 +377,13 @@ const postDevolucao = async (request, reply) => {
       "ciclista": 0
     }
     devolucoesAlugueis.push(devolucao);
-    console.log("@@@@@@@@  DEVOLUÇÃO ALUGUEL @@@@@@", devolucoesAlugueis)
 
     const respostaTranca = await trancaStatusApi.trancarTranca(idTranca, idBicicleta);
     if(respostaTranca.status !== 200) {
       return reply.status(422).send("Não encontrado");
     }
     
-    await enviarEmailApi.enviarEmail(ciclista.email, "Bicicletário System", "Devolução da bicicleta bem sucedida. " + JSON.stringify(aluguel))
-    console.log("$$$$  ALUGUEL   $$$", aluguel);
+    await enviarEmailApi.enviarEmail(ciclista.email, "Bicicletário System", "Devolução da bicicleta bem sucedida. " + JSON.stringify(aluguel));
 
     if(solicitouReparo === true) {
       await bicicletaStatusApi.bicicletaStatus(idBicicleta, "REPARO_SOLICITADO");
@@ -481,7 +476,7 @@ const atualizarCartaoCredito = async (request, reply) => {
       return reply.status(404).send('Ciclista não encontrado');
     }
 
-    const isValid= await validaCartaoDeCreditoApi.validaCartaoDeCredito(dadosAtualizados.nomeTitular, dadosAtualizados.numero, dadosAtualizados.validade, dadosAtualizados.cvv);
+    const isValid = await validaCartaoDeCreditoApi.validaCartaoDeCredito(dadosAtualizados.nomeTitular, dadosAtualizados.numero, dadosAtualizados.validade, dadosAtualizados.cvv);
     if (isValid.status !== 200) {
       return reply.status(isValid.status).send(isValid.data + ". O cartão foi recusado. Entre com um cartão valido.");
     } 
@@ -495,7 +490,7 @@ const atualizarCartaoCredito = async (request, reply) => {
 
     return reply.status(200).send('Dados do cartão de crédito atualizados' + JSON.stringify(ciclista.meioDePagamento));
   } catch (error) {
-    console.error(error);
+    console.log(error);
     reply.status(422).send('Dados inválidos');
   }
 };
@@ -521,7 +516,6 @@ const getDadosCiclista = (ciclista) => {
 
 function calcularDiferencaEValor(dataHoraRetirada, dataHoraDevolucao) {
   const diferenca = moment(dataHoraDevolucao).diff(moment(dataHoraRetirada), 'hours');
-  console.log("#################diferenca#############3", diferenca);
   let valor = 0;
 
   if (diferenca > 2) {

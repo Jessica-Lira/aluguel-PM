@@ -227,7 +227,7 @@ const bodyCiclistaSemCampoNACIONALIDADE = {
     passaporte: {
       numero: "string",
       validade: "2023-06-11",
-      pais: "TX"
+      pais: null
     },
     nacionalidade: "",
     email: "ciclistae@example.com",
@@ -566,13 +566,13 @@ const bodyDadosAtualizados = {
     pais: "pt"
   },
   nacionalidade: "PT",
-  email: "unirio@gmail.com",
+  email: "marianamassine@gmail.com",
   urlFotoDocumento: "string",
   senha: "string",
   confirmarSenha: "string",
   meioDePagamento: {
     nomeTitular: "ana",
-    numero: "12345672345678",
+    numero: "4242424242424242",
     validade: "2023-11",
     cvv: "858"
   },

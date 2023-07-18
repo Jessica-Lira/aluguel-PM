@@ -35,6 +35,95 @@ const callGetCiclistas = async () => {
   })
 }
 
+describe('atualizarCartaoCredito route test', () => {
+  const callAtualizarCartao = async (body, id) => {
+    return await app.inject({
+      method: 'PUT',
+      url: `/cartaoDeCredito/${id}`,
+      payload: body
+    })
+  };
+
+  test('Should update the credit card information of a cyclist', async () => {
+
+    const response = await callAtualizarCartao({
+      nomeTitular: 'Novo nome',
+      numero: '4242424242424242',
+      validade: '2024-12',
+      cvv: '456',
+    }, 6)
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  test('Should return 404 if cyclist is not found', async () => {
+
+    const response = await callAtualizarCartao({
+      nomeTitular: 'Novo nome',
+      numero: '4242424242424242',
+      validade: '2024-12',
+      cvv: '456',
+    }, 32)
+
+    expect(response.statusCode).toBe(404);
+  });
+
+  test('Should return 422 if the credit card is not valid', async () => {
+    const response = await callAtualizarCartao({
+      nomeTitular: 'Novo nome',
+      numero: '987654343',
+      validade: '2024-12',
+      cvv: '456',
+    }, 6)
+
+    expect(response.statusCode).toBe(422);
+  });
+
+  test('Should return 404 if the email is invalid', async () => {
+    const response = await callAtualizarCartao({
+      nomeTitular: 'Novo nome',
+      numero: '4242424242424242',
+      validade: '2024-12',
+      cvv: '456',
+    }, 1)
+
+    expect(response.statusCode).toBe(404);
+    expect(response.body).toBe("Email inválido. Email não enviado.");
+  });
+});
+
+describe('atualizarCiclista route test', () => {
+  const callAtualizarCiclista = async (body, id) => {
+    return await app.inject({
+      method: 'PUT',
+      url: `/ciclistas/${id}`,
+      payload: body
+    })
+  };
+  test('Should update cyclist when valid data is provided', async () => {
+
+    const response = await callAtualizarCiclista(bodyDadosAtualizados, 4);
+
+    expect(response.statusCode).toBe(200);
+  });
+
+
+  test('deve retornar 404 se o ciclista não for encontrado', async () => {
+
+    const response = await callAtualizarCiclista(bodyDadosAtualizados, 34);
+
+    expect(response.statusCode).toBe(404);
+    expect(response.body).toBe('Ciclista não encontrado');
+  });
+
+  test('deve retornar 422 se os dados atualizados forem inválidos', async () => {
+    const response = await callAtualizarCiclista(bodyCiclistaSemCampoNACIONALIDADE, 4);
+
+    expect(response.statusCode).toBe(422);
+    expect(response.body).toBe('Dados inválidos. Preencha todos os campos obrigatórios corretamente.');
+  });
+});
+
 describe('getCiclistas route test', () => {
 
   test('Should return the list of cyclists when called', async () => {
@@ -195,140 +284,6 @@ describe('getCiclistaByID route test', () => {
 
 });
 
-describe('atualizarCiclista route test', () => {
-/*
-  test('Should update cyclist when valid data is provided', async () => {
-    
-    const app = build();
-    const response = await app.inject({
-      method: 'PUT',
-      url: '/ciclistas/4',
-      payload: {
-        id: '777',
-        nome: 'Paulo',
-        nascimento: '2023-06-11',
-        cpf: '12345678955',
-        passaporte: {
-          numero: '123456789',
-          validade: '2023-06-11',
-          pais: 'TL'
-        },
-        nacionalidade: 'BR',
-        email: 'paulo@email.com',
-        urlFotoDocumento: 'string',
-        senha: 'clientepaulo',
-        confirmarSenha: 'clientepaulo',
-        meioDePagamento: {
-          nomeTitular: 'Paulo',
-          numero: '1234512345123456',
-          validade: '2023-06',
-          cvv: '487'
-        },
-        ativo: false,
-      }
-    });
-
-    getEmailApi.getEmail = jest.fn().mockResolvedValue({ data: { exists: true } });
-    validaCartaoDeCreditoApi.validaCartaoDeCredito = jest.fn().mockResolvedValue({ statusCode: 200, message: "ok" });
-    enviarEmailApi.enviarEmail = jest.fn().mockResolvedValue({});
-
-    await atualizarCiclista(response, reply);
-
-    expect(reply.status).toHaveBeenCalledWith(200);
-    //expect(response.statusCode).toBe(200);
-    
-  });
-  */
-
-  test('deve retornar 404 se o ciclista não for encontrado', async () => {
-    const request = {
-      params: {
-        id: 'ciclista-id-inexistente'
-      },
-      body: {}
-    };
-
-    const reply = {
-      status: jest.fn().mockReturnThis(),
-      send: jest.fn()
-    };
-
-    await atualizarCiclista(request, reply);
-
-    expect(reply.status).toHaveBeenCalledWith(404);
-    expect(reply.send).toHaveBeenCalledWith('Ciclista não encontrado');
-  });
-
-  test('deve retornar 422 se os dados atualizados forem inválidos', async () => {
-    const ciclistas = [{
-      id: '4',
-      nacionalidade: 'BR',
-      cpf: '',
-      passaporte: {}
-    }];
-
-    const request = {
-      params: {
-        id: '4'
-      },
-      body: {
-        nacionalidade: 'BR',
-        cpf: '',
-        passaporte: {}
-      }
-    };
-
-    const reply = {
-      status: jest.fn().mockReturnThis(),
-      send: jest.fn()
-    };
-
-    getEmailApi.getEmail = jest.fn().mockResolvedValue({ data: { exists: true } });
-    validaCartaoDeCreditoApi.validaCartaoDeCredito = jest.fn().mockResolvedValue({ statusCode: 200, message: "ok" });
-    enviarEmailApi.enviarEmail = jest.fn().mockResolvedValue({});
-
-    await atualizarCiclista(request, reply, ciclistas);
-
-    expect(reply.status).toHaveBeenCalledWith(422);
-    expect(reply.send).toHaveBeenCalledWith('Dados inválidos. Preencha todos os campos obrigatórios corretamente.');
-  });
-
-/*
-  test('Should update cyclist when valid data is provided', async () => {
-    const app = build();
-    const response = await app.inject({
-      method: 'PUT',
-      url: '/ciclistas/4',
-      payload: {
-        id: '777',
-        nome: 'Paulo',
-        nascimento: '2023-06-11',
-        cpf: '12345678955',
-        passaporte: {
-          numero: '123456789',
-          validade: '2023-06-11',
-          pais: 'TL'
-        },
-        nacionalidade: 'BR',
-        email: 'paulo@email.com',
-        urlFotoDocumento: 'string',
-        senha: 'clientepaulo',
-        confirmarSenha: 'clientepaulo',
-        meioDePagamento: {
-          nomeTitular: 'Paulo',
-          numero: '1234512345123456',
-          validade: '2023-06-11',
-          cvv: '487'
-        },
-        ativo: false,
-      }
-    });
-    expect(response.statusCode).toBe(200);
-  });
-        
-*/
-});
-
 describe('ativarCadastroCiclista route test', () => {
 
   test('Should activate a cyclist when valid ID is provided and cyclist is not active', async () => {
@@ -433,43 +388,6 @@ describe('getCartaoCredito route test', () => {
 
 });
 
-describe('atualizarCartaoCredito route test', () => {
-  /*
-  test('Should update the credit card information of a cyclist', async () => {
-    const app = build();
-
-    const response = await app.inject({
-      method: 'PUT',
-      url: '/cartaoDeCredito/1',
-      payload: {
-        nomeTitular: 'Novo nome',
-        numero: '4242424242424242',
-        validade: '2024-12',
-        cvv: '456',
-      },
-    });
-
-    expect(response.statusCode).toBe(200);
-  });
-*/
-  test('Should return 404 if cyclist is not found', async () => {
-    const app = build();
-
-    const response = await app.inject({
-      method: 'PUT',
-      url: '/ciclistas/cartaoDeCredito/34',
-      payload: {
-        nomeTitular: 'Novo nome',
-        numero: '987654321',
-        validade: '2024-12-31',
-        cvv: '456',
-      },
-    });
-
-    expect(response.statusCode).toBe(404);
-  });
-});
-
 describe('getExisteEmail route test', () => {
   
   test('Should return sucess if email exists in a cyclist', async () => {
@@ -477,6 +395,15 @@ describe('getExisteEmail route test', () => {
     const response = await app.inject({
       method: 'GET',
       url: '/ciclistas/existeEmail/user@example.com',
+    });
+    expect(response.statusCode).toBe(200);
+  });
+
+  test('Should return 200 if email is available', async () => {
+    const app = build();
+    const response = await app.inject({
+      method: 'GET',
+      url: '/ciclistas/existeEmail/joaopedro@gmail.com',
     });
     expect(response.statusCode).toBe(200);
   });
@@ -511,7 +438,7 @@ describe('getExisteEmail route test', () => {
 });
 
 describe('getBiciletaAlugada route test', () => {
-  /*
+
   test('Should return sucess if cyclist have a rent', async () => {
     const app = build();
     const response = await app.inject({
@@ -529,7 +456,7 @@ describe('getBiciletaAlugada route test', () => {
     });
     expect(response.statusCode).toBe(200);
   });
-*/
+
   test('Should return error 404 if cyclist dont exist', async () => {
     const app = build();
     const response = await app.inject({
