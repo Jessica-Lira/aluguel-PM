@@ -388,6 +388,8 @@ describe('getCartaoCredito route test', () => {
 
 });
 
+
+
 describe('getExisteEmail route test', () => {
   
   test('Should return sucess if email exists in a cyclist', async () => {
@@ -529,7 +531,7 @@ describe('postAluguel route test', () => {
       method: 'POST',
       url: '/aluguel',
       payload: {
-        "ciclista": "6",
+        "ciclista": "896",
         "trancaInicio": "0"
       }
     });
