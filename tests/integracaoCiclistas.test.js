@@ -2,23 +2,15 @@
 
 const { build } = require('../src/app');
 const {
-  bodyCiclista, bodyCiclistaSemEmail, bodyCiclistaFormatoEmailErrado, bodyCiclistaInvalidPassaport,
-  bodyCiclistaEmailJaEmUso, bodyCartaoInvalido, bodyCiclistaSemCampoNASCIMENTO, bodyCiclistaFormatoNASCIMENTOErrado,
-  bodyCiclistaSemCampoNOME, bodyCiclistaSemCampoNACIONALIDADE, bodyCiclistaSemCampoSENHA, bodyCiclistaSemCampoCONFIRMARSENHA,
-  bodyCiclistaSemCampoMEIODEPAGAMENTOSemTudo, bodyCiclistaSemCampoMEIODEPAGAMENTOSemNome, bodyCiclistaFormatoMEIODEPAGAMENTOErrado,
-  bodyCiclistaSemCampoMEIODEPAGAMENTOSemNumero, bodyCiclistaSemCampoMEIODEPAGAMENTOSemValidade,
-  bodyCiclistaSemCampoMEIODEPAGAMENTOSemCVV, bodyCiclistaUnmatchingPasswords, bodyCiclistaBrazilianWithCPF,
-  bodyCiclistaNonBrazilianWithPassport, bodyDadosAtualizados
+  bodyCiclista, bodyCiclistaSemCampoNACIONALIDADE, bodyDadosAtualizados
 } = require("./ciclistaMock");
 const app = build();
 const axios = require('axios');
-const { criarCiclista, atualizarCiclista } = require('../src/controller/ciclistasController.js');
+const { criarCiclista } = require('../src/controller/ciclistasController.js');
 const getEmailApi = require('../src/apis/getEmailApi.js');
 const validaCartaoDeCreditoApi = require('../src/apis/validaCartaoDeCreditoApi.js');
 const enviarEmailApi = require('../src/apis/enviarEmailApi.js');
 const getTrancaApi = require("../src/apis/getTrancaApi");
-const getBicicletaApi = require("../src/apis/getBicicletaApi");
-const cobrancaApi = require("../src/apis/cobrancaApi");
 
 const callCriarCiclista = async (body) => {
   return await app.inject({
