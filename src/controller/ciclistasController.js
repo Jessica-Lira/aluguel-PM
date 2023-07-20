@@ -348,16 +348,7 @@ const postDevolucao = async (request, reply) => {
     aluguel.dataHoraDevolucao = dataHoraDevolucao;
     aluguel.valorAluguel = parseInt(aluguel.valorAluguel) + parseInt(temCobrancaExtra);
 
-    ciclista.statusAluguel = false;
-    const devolucao = {
-      "bicicleta": idBicicleta,
-      "horaInicio": aluguel.dataHoraRetirada,
-      "trancaFim": idTranca,
-      "horaFim": dataHoraDevolucao,
-      "cobranca": temCobrancaExtra,
-      "ciclista": 0
-    }
-    
+    ciclista.statusAluguel = false;  
 
     const respostaTranca = await trancaStatusApi.trancarTranca(idTranca, idBicicleta);
     if(respostaTranca.status !== 200) {
