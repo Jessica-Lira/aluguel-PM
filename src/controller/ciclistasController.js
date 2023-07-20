@@ -24,14 +24,7 @@ let alugueis = [{
   "valorAluguel": "10",
 },];
 
-let devolucoesAlugueis = [{
-  "bicicleta": 123,
-  "horaInicio": "2023-06-29T02:52:31.331Z",
-  "trancaFim": 0,
-  "horaFim": "2023-06-29T02:52:31.331Z",
-  "cobranca": 0,
-  "ciclista": 0
-}];
+
 
 const getCiclistas = async (request, reply) => { //metodo aux , nao tem cdu
   try {
@@ -130,7 +123,7 @@ const getCiclistaById = async(request, reply) => {
 };
 
 const atualizarCiclista = async(request, reply) => {
-  try {
+
     const { id } = request.params;
     const dadosAtualizados = request.body;
     const ciclista = ciclistas.find(c => c.id === id);
@@ -161,11 +154,7 @@ const atualizarCiclista = async(request, reply) => {
     ciclistas[ciclistas.indexOf(ciclista)] = { ...ciclista, ...dadosAtualizados };
 
     return reply.status(200).send('Dados atualizados' + JSON.stringify(ciclista));
-  } 
-  catch (error) {
-    console.error(error);
-    reply.status(422).send('Dados inválidos');
-  }
+  
 };
 
 const ativarCadastroCiclista = async (request, reply) => {
@@ -185,7 +174,7 @@ const ativarCadastroCiclista = async (request, reply) => {
     ciclista.ativo = true;
     ciclista.dataConfirmacaoAtivacao = new Date(); // Registrar a data/hora da confirmação
 
-    return reply.status(200).send('Ciclista ativado' + JSON.stringify(ciclista))
+    return reply.status(200).send('Ciclista ativado, requisição némero' + requestId + JSON.stringify(ciclista))
   } catch (error) {
     console.error(error);
     reply.status(422).send('Dados inválidos');
@@ -229,7 +218,7 @@ const permiteAluguel = async (request, reply) => {
 };
 
 const getBicicletaAlugada = async (request, reply) => {
-  try {
+
     const ciclistaId = request.params.id;
     const ciclista = ciclistas.find(c => c.id === ciclistaId);
     if(ciclista === undefined){
@@ -255,14 +244,10 @@ const getBicicletaAlugada = async (request, reply) => {
     } else {
       return reply.status(200).send({});
     }
-  } catch (error) {
-    reply.code(500).send('Erro interno do servidor');
-  }
 }
 
 const postAluguel = async (request, reply) => {
 
-  try {
     const numeroTranca = request.body.trancaInicio;
     const ciclistaId = request.body.ciclista;
 
@@ -273,7 +258,6 @@ const postAluguel = async (request, reply) => {
     }
 
     if (permiteAluguel.mensagem === 'Ciclista inativo. Ative sua conta.') {
-      // return reply.status(422).send(JSON.stringify(permiteAluguel.mensagem));
       return reply.status(422).send(permiteAluguel.mensagem);
     }
 
@@ -331,10 +315,7 @@ const postAluguel = async (request, reply) => {
     await enviarEmailApi.enviarEmail(permiteAluguel.ciclista.email, "Bicicletário System", "Aluguel solicitado \n" + JSON.stringify(aluguel));
 
     return reply.status(200).send('Aluguel solicitado com sucesso' );
-  } catch (error) {
-    console.error(error);
-    reply.status(500).send('Erro interno do servidor');
-  }
+
 };
 
 const postDevolucao = async (request, reply) => {
@@ -376,7 +357,7 @@ const postDevolucao = async (request, reply) => {
       "cobranca": temCobrancaExtra,
       "ciclista": 0
     }
-    devolucoesAlugueis.push(devolucao);
+    
 
     const respostaTranca = await trancaStatusApi.trancarTranca(idTranca, idBicicleta);
     if(respostaTranca.status !== 200) {
@@ -400,7 +381,6 @@ const postDevolucao = async (request, reply) => {
 /* ********                EMAIL                   ********    */
 
 const getExisteEmail = async (request, reply) => {
-  try {
     const { email } = request.params;
 
     if (!email) {
@@ -436,14 +416,6 @@ const getExisteEmail = async (request, reply) => {
         emailExists: false,
       });
     }
-  } catch (error) {
-    console.error(error);
-    reply.status(422).send({
-      success: false,
-      status: 422,
-      message: 'Erro ao verificar a existência do e-mail',
-    });
-  }
 }; 
 
 /* ********                CARTAO                   ********    */
